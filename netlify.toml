@@ -1,0 +1,36 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[build.environment]
+  SMTP_HOST = "${SMTP_HOST}"
+  SMTP_PORT = "${SMTP_PORT}"
+  SMTP_SECURE = "${SMTP_SECURE}"
+  SMTP_USER = "${SMTP_USER}"
+  SMTP_PASS = "${SMTP_PASS}"
+  FIREBASE_API_KEY = "${FIREBASE_API_KEY}"
+  FIREBASE_AUTH_DOMAIN = "${FIREBASE_AUTH_DOMAIN}"
+  FIREBASE_PROJECT_ID = "${FIREBASE_PROJECT_ID}"
+  FIREBASE_STORAGE_BUCKET = "${FIREBASE_STORAGE_BUCKET}"
+  FIREBASE_MESSAGING_SENDER_ID = "${FIREBASE_MESSAGING_SENDER_ID}"
+  FIREBASE_APP_ID = "${FIREBASE_APP_ID}"
+  FIREBASE_DATABASE_URL = "${FIREBASE_DATABASE_URL}"
+
+[forms]
+  booking = "booking"
+  bookingConfirmation = "netlify/functions/bookingConfirmation.ts"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[dev]
+  command = "npm run dev"
+  port = 8888
+  targetPort = 5173
+  publish = "dist"
+
+[[plugins]]
+package = "@netlify/plugin-functions-install-core"
