@@ -34,7 +34,7 @@ const AboutUsPage: React.FC = () => {
       <div className="px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-6xl mx-auto">
           <BackButton />
-          <h1 className="text-5xl font-bold text-burgundy mb-8 text-center" data-aos="fade-up">
+          <h1 className="text-5xl md:text-5xl text-3xl font-bold text-burgundy mb-8 text-center px-4" data-aos="fade-up">
             About Noshe Cambridge
           </h1>
           
@@ -45,7 +45,9 @@ const AboutUsPage: React.FC = () => {
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center">
-              <p className="text-4xl text-white font-serif italic">Where Tradition Meets Innovation</p>
+              <p className="text-3xl md:text-4xl text-white font-serif italic text-center px-4">
+                Where Tradition Meets Innovation
+              </p>
             </div>
           </div>
         </div>
@@ -67,17 +69,17 @@ const AboutUsPage: React.FC = () => {
                     </p>
                   </Card>
                 </div>
-                <div className="order-1 md:order-2 grid grid-cols-2 gap-4 relative">
+                <div className="order-1 md:order-2 grid grid-cols-1 sm:grid-cols-2 gap-4 relative">
                   <div className="absolute -inset-4 bg-burgundy opacity-5 rounded-lg transform -rotate-2"></div>
                   <img 
                     src="https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?q=80&w=2069&auto=format&fit=crop" 
                     alt="Traditional Afghan Dish" 
-                    className="rounded-lg shadow-lg object-cover h-full"
+                    className="rounded-lg shadow-lg object-cover w-full h-[200px] sm:h-full"
                   />
                   <img 
                     src="https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?q=80&w=2069&auto=format&fit=crop" 
                     alt="Modern Afghan Cuisine" 
-                    className="rounded-lg shadow-lg object-cover h-full"
+                    className="rounded-lg shadow-lg object-cover w-full h-[200px] sm:h-full"
                   />
                 </div>
               </div>
@@ -91,8 +93,7 @@ const AboutUsPage: React.FC = () => {
           <Section className="mb-0">
             <div className="bg-burgundy rounded-2xl shadow-lg overflow-hidden">
               <div className="grid grid-cols-1 md:grid-cols-2 relative">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cream/20 to-transparent"></div>
-                <div className="p-8 lg:p-12 text-center">
+                <div className="p-6 lg:p-12 text-center md:text-left">
                   <div className="absolute top-0 right-0 opacity-5">
                     <Coffee size={200} />
                   </div>
@@ -114,7 +115,7 @@ const AboutUsPage: React.FC = () => {
                     <ArrowRight className="ml-2" size={20} />
                   </Link>
                 </div>
-                <div className="relative h-[400px]">
+                <div className="relative h-[300px] md:h-[400px]">
                   <img 
                     src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=2057&auto=format&fit=crop"
                     alt="Kenza Coffee Roasting" 
@@ -132,7 +133,7 @@ const AboutUsPage: React.FC = () => {
           <Section className="mb-0">
             <div className="bg-white/90 rounded-2xl shadow-lg p-8">
               <SectionTitle icon={<Utensils size={32} />} title="Our Culinary Philosophy" />
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
                 <Card className="bg-white transform hover:scale-[1.02] transition-transform duration-300 hover:shadow-xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 opacity-5 transform -translate-y-1/4 translate-x-1/4">
                     <Utensils size={120} />
@@ -165,18 +166,15 @@ const AboutUsPage: React.FC = () => {
           <Section className="mb-0">
             <div className="bg-burgundy text-cream rounded-xl overflow-hidden shadow-2xl relative">
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cream/20 to-transparent"></div>
-              <div className="p-8 lg:p-12">
-                <div className="flex flex-col md:flex-row justify-between items-center gap-8">
-                  {/* Left side content */}
-                  <div className="md:w-1/2">
-                    <h2 className="text-3xl font-bold mb-4">Reserve Your Table</h2>
-                    <p className="text-lg text-cream/90">
+              <div className="p-6 lg:p-12">
+                <div className="flex flex-col md:flex-row justify-between items-center gap-6 md:gap-8">
+                  <div className="w-full md:w-1/2 text-center md:text-left">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4">Reserve Your Table</h2>
+                    <p className="text-base md:text-lg text-cream/90">
                       Join us for an authentic Afghan dining experience at Noshe Cambridge
                     </p>
                   </div>
-
-                  {/* Right side buttons - slightly more centered */}
-                  <div className="flex flex-col items-center md:items-center gap-6 md:w-1/2">
+                  <div className="w-full md:w-1/2 flex flex-col items-center gap-4">
                     <Link 
                       to="/booking" 
                       className="inline-flex items-center bg-cream text-burgundy px-10 py-4 rounded-lg font-semibold hover:bg-opacity-90 transition-all transform hover:-translate-y-0.5 shadow-lg"
@@ -206,9 +204,9 @@ const AboutUsPage: React.FC = () => {
           <Section className="mb-0">
             <div className="bg-green rounded-2xl shadow-lg p-8 text-cream">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
-                <div className="p-8 lg:p-12">
-                  <h2 className="text-3xl font-bold mb-8 text-center md:text-left">Visit Us</h2>
-                  <div className="space-y-8">
+                <div className="p-6 lg:p-12">
+                  <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center md:text-left">Visit Us</h2>
+                  <div className="space-y-6 md:space-y-8">
                     <div className="flex items-start space-x-4 group hover:transform hover:translate-x-2 transition-transform">
                       <MapPin size={24} className="flex-shrink-0 mt-1" />
                       <div>
