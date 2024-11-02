@@ -38,7 +38,13 @@ const Footer: React.FC = () => {
         </div>
         <div>
           <h3 className="text-xl font-bold mb-4 text-cream">Follow Us</h3>
-          <a href="https://www.instagram.com/noshecambridge" target="_blank" rel="noopener noreferrer" className="flex items-center hover:text-green transition-colors text-base">
+          <a 
+            href="https://www.instagram.com/noshecambridge" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="flex items-center hover:text-green transition-colors text-base"
+            aria-label="Follow us on Instagram"
+          >
             <Instagram className="mr-2" size={18} />
             @noshecambridge
           </a>
@@ -47,13 +53,13 @@ const Footer: React.FC = () => {
             <ul className="space-y-1 text-sm">
               <li><Link to="/privacy-policy" className="hover:text-green transition-colors">Privacy Policy</Link></li>
               <li><Link to="/terms-of-service" className="hover:text-green transition-colors">Terms of Service</Link></li>
-              <li><a href="#" className="hover:text-green transition-colors">Allergen Information</a></li>
+              <li><Link to="/allergen-information" className="hover:text-green transition-colors">Allergen Information</Link></li>
             </ul>
           </div>
         </div>
       </div>
       <div className="container mx-auto mt-8 pt-8 border-t border-cream border-opacity-20 text-center text-sm">
-        © 2023 Noshe Cambridge. All rights reserved.
+        © {new Date().getFullYear()} Noshe Cambridge. All rights reserved.
       </div>
     </footer>
   )

@@ -3,9 +3,11 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Download, ShoppingBag } from 'lucide-react';
 import AOS from 'aos';
 import menuPDF from '../assets/menu.pdf';
+import BackButton from './BackButton';
 
 const MenuPage: React.FC = () => {
   const [pdfUrl, setPdfUrl] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -23,13 +25,15 @@ const MenuPage: React.FC = () => {
       });
   }, []);
 
+  const handleOrderClick = () => {
+    setIsLoading(true);
+    window.location.href = 'https://noshe-orders.pharmix.co.uk/';
+  };
+
   return (
     <div className="min-h-screen bg-cream py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <Link to="/" className="inline-flex items-center text-burgundy hover:text-green transition-colors mb-8" data-aos="fade-right">
-          <ArrowLeft className="mr-2" size={20} />
-          Back to Home
-        </Link>
+        <BackButton />
         <h1 className="text-5xl font-bold text-burgundy mb-4 text-center" data-aos="fade-down">Our Menu</h1>
         <p className="text-xl text-gray-600 mb-8 text-center" data-aos="fade-up" data-aos-delay="200">Discover our delightful selection of coffee and treats</p>
         
@@ -55,13 +59,26 @@ const MenuPage: React.FC = () => {
             Download Menu
           </a>
           <a 
-            href="https://noshe-orders.pharmix.co.uk/" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center bg-green text-white py-3 px-6 rounded-full hover:bg-burgundy transition-colors shadow-md w-full sm:w-auto"
+            onClick={handleOrderClick}
+            className={`inline-flex items-center justify-center ${
+              isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-green hover:bg-burgundy'
+            } text-white py-3 px-6 rounded-full transition-colors shadow-md w-full sm:w-auto`}
+            disabled={isLoading}
           >
-            <ShoppingBag className="mr-2" size={20} />
-            Order Online
+            {isLoading ? (
+              <span className="flex items-center">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Loading...
+              </span>
+            ) : (
+              <>
+                <ShoppingBag className="mr-2" size={20} />
+                Order Online
+              </>
+            )}
           </a>
         </div>
         

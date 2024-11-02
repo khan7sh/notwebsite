@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Coffee } from 'lucide-react';
+import BackButton from './BackButton';
 
 const CoffeeOption: React.FC<{ name: string; description: string; price: string }> = ({ name, description, price }) => (
   <div className="bg-white bg-opacity-50 rounded-lg p-6 shadow-sm" data-aos="fade-up">
@@ -18,10 +19,7 @@ const KenzaCoffeePage: React.FC = () => {
   return (
     <div className="min-h-screen bg-cream py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
-        <Link to="/" className="inline-flex items-center text-burgundy hover:text-green transition-colors mb-8">
-          <ArrowLeft className="mr-2" size={24} />
-          Back to Home
-        </Link>
+        <BackButton />
         <h1 className="text-4xl font-bold text-burgundy mb-8" data-aos="fade-up">Kenza Coffee</h1>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">

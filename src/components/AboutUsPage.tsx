@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Coffee, Utensils, Globe, Users, Star, Heart } from 'lucide-react';
+import BackButton from './BackButton';
 
 const AboutUsPage: React.FC = () => {
   useEffect(() => {
@@ -29,10 +30,7 @@ const AboutUsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-cream py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <Link to="/" className="inline-flex items-center text-burgundy hover:text-green transition-colors mb-8">
-          <ArrowLeft className="mr-2" size={24} />
-          Back to Home
-        </Link>
+        <BackButton />
         <h1 className="text-5xl font-bold text-burgundy mb-12 text-center" data-aos="fade-up">About Noshe Cambridge</h1>
         
         <Section>

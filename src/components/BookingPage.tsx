@@ -4,6 +4,7 @@ import BookingForm from './BookingForm';
 import Footer from './Footer';
 import { Phone } from 'lucide-react';
 import AOS from 'aos';
+import BackButton from './BackButton';
 
 const BookingPage: React.FC = () => {
   useEffect(() => {
@@ -15,14 +16,7 @@ const BookingPage: React.FC = () => {
     <div className="min-h-screen bg-cream flex flex-col">
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-8">
-          <Link to="/" className="inline-block mb-8 text-burgundy hover:text-opacity-80 transition-colors" data-aos="fade-right">
-            <span className="flex items-center">
-              <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-              </svg>
-              Go Back
-            </span>
-          </Link>
+          <BackButton />
           <h1 className="text-5xl font-bold text-center mb-12 text-burgundy" data-aos="fade-down">Book Your Table</h1>
           <div className="max-w-5xl mx-auto bg-white shadow-2xl rounded-lg overflow-hidden" data-aos="fade-up" data-aos-delay="200">
             <div className="md:flex">

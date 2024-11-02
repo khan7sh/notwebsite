@@ -1,18 +1,16 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import BackButton from './BackButton';
 
 const TermsOfService: React.FC = () => {
   return (
     <div className="min-h-screen bg-cream py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        <Link to="/" className="inline-flex items-center text-burgundy hover:text-green transition-colors mb-8">
-          <ArrowLeft className="mr-2" size={24} />
-          Back to Home
-        </Link>
-        <h1 className="text-4xl font-bold text-burgundy mb-8">Terms of Service</h1>
-        <div className="prose prose-burgundy">
-          <p>Last updated: [Current Date]</p>
+        <div data-aos="fade-right">
+          <BackButton />
+        </div>
+        <h1 className="text-4xl font-bold text-burgundy mb-8" data-aos="fade-up">Terms of Service</h1>
+        <div className="prose prose-burgundy" data-aos="fade-up" data-aos-delay="200">
+          <p>Last updated: 02.11.2024</p>
           <p>Please read these Terms of Service carefully before using the Noshe Cambridge website or services.</p>
           
           <h2>1. Acceptance of Terms</h2>
@@ -34,7 +32,7 @@ const TermsOfService: React.FC = () => {
           <p>We reserve the right to modify or replace these Terms of Service at any time. It is your responsibility to check these Terms periodically for changes.</p>
           
           <h2>7. Contact Us</h2>
-          <p>If you have any questions about these Terms of Service, please contact us at [contact email].</p>
+          <p>If you have any questions about these Terms of Service, please contact us at <a href="mailto:noshecambridge@gmail.com" className="text-burgundy hover:text-green transition-colors">noshecambridge@gmail.com</a>.</p>
         </div>
       </div>
     </div>

@@ -130,9 +130,9 @@ const AdminPanel: React.FC = () => {
   };
 
   const formatWeekRange = (date: Date) => {
-    const start = startOfWeek(date, { weekStartsOn: 2 });
-    const end = endOfWeek(date, { weekStartsOn: 2 });
-    return `${format(start, 'MMM d, yyyy')} - ${format(end, 'MMM d, yyyy')}`;
+    const start = startOfWeek(date, { weekStartsOn: 1 });
+    const end = endOfWeek(date, { weekStartsOn: 1 });
+    return `${format(start, 'MMM d')} - ${format(end, 'MMM d, yyyy')}`;
   };
 
   const exportBookingsForDate = async (date: Date) => {
@@ -275,7 +275,7 @@ const AdminPanel: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col md:flex-row h-screen bg-cream">
+    <div className="flex flex-col md:flex-row min-h-screen bg-cream">
       {/* Mobile Header */}
       <div className="md:hidden bg-burgundy text-white p-4 flex justify-between items-center">
         <h1 className="text-xl font-bold">Admin Panel</h1>
@@ -285,7 +285,9 @@ const AdminPanel: React.FC = () => {
       </div>
 
       {/* Sidebar */}
-      <div className={`w-full md:w-64 bg-burgundy text-white h-auto md:h-screen transition-all duration-300 ease-in-out ${isSidebarOpen ? 'block' : 'hidden'} md:block`}>
+      <div className={`fixed md:relative w-full md:w-64 bg-burgundy text-white h-screen z-50 transition-all duration-300 ease-in-out ${
+        isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      } md:block`}>
         <div className="p-6">
           <h1 className="text-2xl font-bold mb-8 hidden md:block">Admin Panel</h1>
           <nav>
@@ -327,200 +329,210 @@ const AdminPanel: React.FC = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-4 md:p-10 overflow-y-auto">
-        {activeTab === 'bookings' && (
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-burgundy mb-6">Bookings</h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white shadow-md rounded-lg p-4 lg:p-6">
-                <h3 className="text-xl font-semibold text-burgundy mb-4">Select Date</h3>
-                <ReactCalendar
-                  onChange={(date) => {
-                    setSelectedDate(date as Date);
-                    fetchDailyBookings(date as Date);
-                  }}
-                  value={selectedDate}
-                  className="w-full max-w-full"
-                />
-                <div className="mt-4 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-                  <button
-                    onClick={exportAllBookings}
-                    disabled={isLoading}
-                    className="bg-burgundy text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors flex items-center justify-center disabled:opacity-50 text-sm font-semibold w-full sm:w-auto"
-                  >
-                    <Download className="mr-2" size={18} />
-                    Export All
-                  </button>
-                  <button
-                    onClick={() => exportBookingsForDate(selectedDate)}
-                    disabled={isLoading}
-                    className="bg-burgundy text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors flex items-center justify-center disabled:opacity-50 text-sm font-semibold w-full sm:w-auto"
-                  >
-                    <Download className="mr-2" size={18} />
-                    Export Selected Date
-                  </button>
+      <div className="flex-1 md:overflow-hidden">
+        <div className="h-full overflow-y-auto px-4 md:px-10 py-4 md:py-10">
+          {activeTab === 'bookings' && (
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold text-burgundy mb-6">Bookings</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="bg-white shadow-md rounded-lg p-4 lg:p-6">
+                  <h3 className="text-xl font-semibold text-burgundy mb-4">Select Date</h3>
+                  <ReactCalendar
+                    onChange={(date) => {
+                      setSelectedDate(date as Date);
+                      fetchDailyBookings(date as Date);
+                    }}
+                    value={selectedDate}
+                    className="w-full max-w-full"
+                  />
+                  <div className="mt-4 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+                    <button
+                      onClick={exportAllBookings}
+                      disabled={isLoading}
+                      className="bg-burgundy text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors flex items-center justify-center disabled:opacity-50 text-sm font-semibold w-full sm:w-auto"
+                    >
+                      <Download className="mr-2" size={18} />
+                      Export All
+                    </button>
+                    <button
+                      onClick={() => exportBookingsForDate(selectedDate)}
+                      disabled={isLoading}
+                      className="bg-burgundy text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors flex items-center justify-center disabled:opacity-50 text-sm font-semibold w-full sm:w-auto"
+                    >
+                      <Download className="mr-2" size={18} />
+                      Export Selected Date
+                    </button>
+                  </div>
+                </div>
+                <div className="bg-white shadow-md rounded-lg p-4 lg:p-6">
+                  <h3 className="text-xl font-semibold text-burgundy mb-4">
+                    Bookings for {format(selectedDate, 'MMMM d, yyyy')}
+                  </h3>
+                  {isLoading ? (
+                    <p>Loading...</p>
+                  ) : error ? (
+                    <p className="text-red-600">{error}</p>
+                  ) : dailyBookings.length === 0 ? (
+                    <p>No bookings for this date.</p>
+                  ) : (
+                    <ul className="space-y-4">
+                      {dailyBookings.map((booking, index) => (
+                        <li key={index} className="border-b pb-4 last:border-b-0">
+                          <div className="flex flex-col space-y-3">
+                            <div className="flex items-start justify-between">
+                              <div className="space-y-1">
+                                <div className="flex items-center">
+                                  <User className="mr-2 flex-shrink-0" size={18} />
+                                  <span className="font-semibold">{booking.name}</span>
+                                </div>
+                                <p className="text-sm">Date: {format(new Date(booking.date), 'yyyy-MM-dd', { timeZone: 'UTC' })}</p>
+                                <p className="text-sm">Time: {booking.time}</p>
+                                <p className="text-sm">Guests: {booking.guests}</p>
+                                {booking.specialRequests && (
+                                  <p className="text-sm text-gray-600">
+                                    Special Requests: {booking.specialRequests}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="flex flex-col space-y-2">
+                                <button
+                                  onClick={() => handleCancelBooking(booking.id)}
+                                  disabled={cancellingBookingId === booking.id}
+                                  className={`px-3 py-1 rounded-md transition-colors ${
+                                    cancellingBookingId === booking.id
+                                      ? 'bg-gray-400 cursor-not-allowed'
+                                      : 'bg-red-500 hover:bg-red-600'
+                                  } text-white`}
+                                >
+                                  {cancellingBookingId === booking.id ? 'Cancelling...' : 'Cancel'}
+                                </button>
+                                <button
+                                  onClick={() => handleEditBooking(booking)}
+                                  className="px-3 py-1 rounded-md transition-colors bg-blue-500 hover:bg-blue-600 text-white"
+                                >
+                                  Edit
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </div>
+              {error && <p className="text-red-600 mt-4 text-sm">{error}</p>}
+              {successMessage && (
+                <p className="mt-4 text-green-600 text-center">{successMessage}</p>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'reportdata' && (
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold text-burgundy mb-6">Report Data</h2>
               <div className="bg-white shadow-md rounded-lg p-4 lg:p-6">
-                <h3 className="text-xl font-semibold text-burgundy mb-4">
-                  Bookings for {format(selectedDate, 'MMMM d, yyyy')}
-                </h3>
+                <h3 className="text-xl font-semibold text-burgundy mb-4">Weekly Booking Report</h3>
+                <div className="mb-4">
+                  <label htmlFor="weekSelect" className="block text-sm font-medium text-gray-700 mb-2">Select Week</label>
+                  <input
+                    type="date"
+                    id="weekSelect"
+                    value={format(selectedWeek, "yyyy-MM-dd")}
+                    onChange={(e) => {
+                      const date = new Date(e.target.value);
+                      setSelectedWeek(startOfWeek(date, { weekStartsOn: 2 }));
+                    }}
+                    className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-burgundy focus:border-burgundy sm:text-sm"
+                  />
+                  <p className="mt-1 text-sm text-gray-500">{formatWeekRange(selectedWeek)}</p>
+                </div>
                 {isLoading ? (
                   <p>Loading...</p>
                 ) : error ? (
                   <p className="text-red-600">{error}</p>
-                ) : dailyBookings.length === 0 ? (
-                  <p>No bookings for this date.</p>
                 ) : (
-                  <ul className="space-y-4">
-                    {dailyBookings.map((booking, index) => (
-                      <li key={index} className="border-b pb-2">
-                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
-                          <div>
-                            <div className="flex items-center">
-                              <User className="mr-2" size={18} />
-                              <span className="font-semibold">{booking.name}</span>
-                            </div>
-                            <p>Date: {format(new Date(booking.date), 'yyyy-MM-dd', { timeZone: 'UTC' })}</p>
-                            <p>Time: {booking.time}</p>
-                            <p>Guests: {booking.guests}</p>
-                            {booking.specialRequests && (
-                              <p className="text-sm text-gray-600">
-                                Special Requests: {booking.specialRequests}
-                              </p>
-                            )}
-                          </div>
-                          <div className="mt-2 sm:mt-0 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-                            <button
-                              onClick={() => handleCancelBooking(booking.id)}
-                              disabled={cancellingBookingId === booking.id}
-                              className={`px-3 py-1 rounded-md transition-colors ${
-                                cancellingBookingId === booking.id
-                                  ? 'bg-gray-400 cursor-not-allowed'
-                                  : 'bg-red-500 hover:bg-red-600'
-                              } text-white`}
-                            >
-                              {cancellingBookingId === booking.id ? 'Cancelling...' : 'Cancel'}
-                            </button>
-                            <button
-                              onClick={() => handleEditBooking(booking)}
-                              className="px-3 py-1 rounded-md transition-colors bg-blue-500 hover:bg-blue-600 text-white"
-                            >
-                              Edit
-                            </button>
-                          </div>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
+                  <div className="h-64 sm:h-96">
+                    <Bar
+                      data={{
+                        labels: weeklyBookings.map(booking => format(booking.date, 'EEE')),
+                        datasets: [
+                          {
+                            label: 'Number of Bookings',
+                            data: weeklyBookings.map(booking => booking.count),
+                            backgroundColor: 'rgba(120, 20, 20, 0.6)',
+                            borderColor: 'rgba(120, 20, 20, 1)',
+                            borderWidth: 1,
+                          },
+                        ],
+                      }}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            position: 'top' as const,
+                            labels: {
+                              boxWidth: 10,
+                              font: {
+                                size: 10,
+                              },
+                            },
+                          },
+                          title: {
+                            display: true,
+                            text: `Bookings for week of ${formatWeekRange(selectedWeek)}`,
+                            font: {
+                              size: 12,
+                            },
+                          },
+                          tooltip: {
+                            callbacks: {
+                              title: (tooltipItems) => {
+                                const index = tooltipItems[0].dataIndex;
+                                return format(weeklyBookings[index].date, 'MMMM d, yyyy');
+                              },
+                            },
+                          },
+                        },
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                            ticks: {
+                              stepSize: 1,
+                              font: {
+                                size: 10,
+                              },
+                            },
+                          },
+                          x: {
+                            ticks: {
+                              font: {
+                                size: 10,
+                              },
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </div>
                 )}
               </div>
             </div>
-            {error && <p className="text-red-600 mt-4 text-sm">{error}</p>}
-            {successMessage && (
-              <p className="mt-4 text-green-600 text-center">{successMessage}</p>
-            )}
-          </div>
-        )}
-
-        {activeTab === 'reportdata' && (
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-burgundy mb-6">Report Data</h2>
-            <div className="bg-white shadow-md rounded-lg p-4 lg:p-6">
-              <h3 className="text-xl font-semibold text-burgundy mb-4">Weekly Booking Report</h3>
-              <div className="mb-4">
-                <label htmlFor="weekSelect" className="block text-sm font-medium text-gray-700 mb-2">Select Week</label>
-                <input
-                  type="date"
-                  id="weekSelect"
-                  value={format(selectedWeek, "yyyy-MM-dd")}
-                  onChange={(e) => {
-                    const date = new Date(e.target.value);
-                    setSelectedWeek(startOfWeek(date, { weekStartsOn: 2 }));
-                  }}
-                  className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-burgundy focus:border-burgundy sm:text-sm"
-                />
-                <p className="mt-1 text-sm text-gray-500">{formatWeekRange(selectedWeek)}</p>
-              </div>
-              {isLoading ? (
-                <p>Loading...</p>
-              ) : error ? (
-                <p className="text-red-600">{error}</p>
-              ) : (
-                <div className="h-64 sm:h-96">
-                  <Bar
-                    data={{
-                      labels: weeklyBookings.map(booking => format(booking.date, 'EEE')),
-                      datasets: [
-                        {
-                          label: 'Number of Bookings',
-                          data: weeklyBookings.map(booking => booking.count),
-                          backgroundColor: 'rgba(120, 20, 20, 0.6)',
-                          borderColor: 'rgba(120, 20, 20, 1)',
-                          borderWidth: 1,
-                        },
-                      ],
-                    }}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: {
-                          position: 'top' as const,
-                          labels: {
-                            boxWidth: 10,
-                            font: {
-                              size: 10,
-                            },
-                          },
-                        },
-                        title: {
-                          display: true,
-                          text: `Bookings for week of ${formatWeekRange(selectedWeek)}`,
-                          font: {
-                            size: 12,
-                          },
-                        },
-                        tooltip: {
-                          callbacks: {
-                            title: (tooltipItems) => {
-                              const index = tooltipItems[0].dataIndex;
-                              return format(weeklyBookings[index].date, 'MMMM d, yyyy');
-                            },
-                          },
-                        },
-                      },
-                      scales: {
-                        y: {
-                          beginAtZero: true,
-                          ticks: {
-                            stepSize: 1,
-                            font: {
-                              size: 10,
-                            },
-                          },
-                        },
-                        x: {
-                          ticks: {
-                            font: {
-                              size: 10,
-                            },
-                          },
-                        },
-                      },
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
       {editingBooking && (
         <EditBookingModal
           booking={editingBooking}
           onClose={() => setEditingBooking(null)}
           onSave={handleSaveEditedBooking}
+        />
+      )}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
         />
       )}
     </div>
