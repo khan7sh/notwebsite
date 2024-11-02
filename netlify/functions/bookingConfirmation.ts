@@ -117,7 +117,13 @@ const createCustomerEmail = (bookingData: any) => {
 };
 
 const createManagerEmail = (bookingData: any) => {
-  // Your existing manager email template
+  const formattedDate = new Date(bookingData.date).toLocaleDateString('en-GB', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+
   return {
     from: '"Noshe Cambridge Bookings" <noshecambridge@gmail.com>',
     to: 'noshecambridge@gmail.com',
@@ -131,7 +137,7 @@ const createManagerEmail = (bookingData: any) => {
           <p><strong>Name:</strong> ${bookingData.name}</p>
           <p><strong>Email:</strong> ${bookingData.email}</p>
           <p><strong>Phone:</strong> ${bookingData.phone}</p>
-          <p><strong>Date:</strong> ${bookingData.date}</p>
+          <p><strong>Date:</strong> ${formattedDate}</p>
           <p><strong>Time:</strong> ${bookingData.time}</p>
           <p><strong>Number of guests:</strong> ${bookingData.guests}</p>
           ${bookingData.specialRequests ? `<p><strong>Special Requests:</strong> ${bookingData.specialRequests}</p>` : ''}
