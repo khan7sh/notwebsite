@@ -1,28 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Download, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, Download, ShoppingBag, ZoomIn } from 'lucide-react';
 import AOS from 'aos';
-import menuPDF from '../assets/menu.pdf';
+import menuPDF from '../assets/oldmenu.pdf';
+import menuImage from '../assets/menu.jpg';
 import BackButton from './BackButton';
 
 const MenuPage: React.FC = () => {
-  const [pdfUrl, setPdfUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     AOS.refresh();
-    
-    // Convert PDF to base64
-    fetch(menuPDF)
-      .then(response => response.blob())
-      .then(blob => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setPdfUrl(reader.result as string);
-        };
-        reader.readAsDataURL(blob);
-      });
   }, []);
 
   const handleOrderClick = () => {
@@ -31,25 +21,34 @@ const MenuPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cream py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-cream py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         <BackButton />
-        <h1 className="text-5xl font-bold text-burgundy mb-4 text-center" data-aos="fade-down">Our Menu</h1>
-        <p className="text-xl text-gray-600 mb-8 text-center" data-aos="fade-up" data-aos-delay="200">Discover our delightful selection of coffee and treats</p>
-        
-        <div className="w-full mb-8 rounded-lg overflow-hidden shadow-xl menu-pdf-container" data-aos="zoom-in" data-aos-delay="400">
-          {pdfUrl && (
-            <iframe 
-              src={`${pdfUrl}#toolbar=0&navpanes=0&scrollbar=0`}
-              className="w-full h-full border-none pdf-iframe"
-              title="Kenza Coffee Menu"
-            >
-              This browser does not support PDFs. Please download the PDF to view it.
-            </iframe>
-          )}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl sm:text-5xl font-bold text-burgundy mb-3" data-aos="fade-down">
+            Our Menu
+          </h1>
+          <p className="text-lg sm:text-xl text-gray-600" data-aos="fade-up" data-aos-delay="200">
+            Discover our delightful selection of coffee and authentic Afghan cuisine
+          </p>
         </div>
         
-        <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mb-12" data-aos="fade-up" data-aos-delay="600">
+        <div className="relative w-full mb-8 rounded-lg overflow-hidden shadow-xl menu-container" 
+             data-aos="zoom-in" 
+             data-aos-delay="400"
+             onClick={() => setIsImageModalOpen(true)}
+        >
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-20 opacity-0 hover:opacity-100 transition-opacity cursor-pointer z-10">
+            <ZoomIn className="text-white" size={32} />
+          </div>
+          <img 
+            src={menuImage} 
+            alt="Noshe Restaurant Menu" 
+            className="w-full h-auto rounded-lg"
+          />
+        </div>
+        
+        <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mt-16 mb-24" data-aos="fade-up" data-aos-delay="600">
           <a 
             href={menuPDF}
             download 
@@ -81,6 +80,19 @@ const MenuPage: React.FC = () => {
             )}
           </a>
         </div>
+
+        {isImageModalOpen && (
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center p-4"
+            onClick={() => setIsImageModalOpen(false)}
+          >
+            <img 
+              src={menuImage} 
+              alt="Noshe Restaurant Menu" 
+              className="max-w-full max-h-[90vh] object-contain"
+            />
+          </div>
+        )}
         
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-2xl font-semibold text-burgundy mb-4 text-center">Additional Information</h2>
