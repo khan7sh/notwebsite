@@ -40,7 +40,7 @@ const AboutUsPage: React.FC = () => {
           
           <div className="relative h-[400px] mb-12 rounded-xl overflow-hidden" data-aos="fade-up">
             <img 
-              src="/images/restaurant-interior.jpg" 
+              src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=2070&auto=format&fit=crop"
               alt="Noshe Cambridge Interior" 
               className="w-full h-full object-cover"
             />
@@ -70,12 +70,12 @@ const AboutUsPage: React.FC = () => {
                 <div className="order-1 md:order-2 grid grid-cols-2 gap-4 relative">
                   <div className="absolute -inset-4 bg-burgundy opacity-5 rounded-lg transform -rotate-2"></div>
                   <img 
-                    src="/images/food-1.jpg" 
+                    src="https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?q=80&w=2069&auto=format&fit=crop" 
                     alt="Traditional Afghan Dish" 
                     className="rounded-lg shadow-lg object-cover h-full"
                   />
                   <img 
-                    src="/images/food-2.jpg" 
+                    src="https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?q=80&w=2069&auto=format&fit=crop" 
                     alt="Modern Afghan Cuisine" 
                     className="rounded-lg shadow-lg object-cover h-full"
                   />
@@ -116,7 +116,7 @@ const AboutUsPage: React.FC = () => {
                 </div>
                 <div className="relative h-[400px]">
                   <img 
-                    src="/images/coffee-roasting.jpg" 
+                    src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?q=80&w=2057&auto=format&fit=crop"
                     alt="Kenza Coffee Roasting" 
                     className="w-full h-full object-cover"
                   />
