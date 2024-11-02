@@ -48,6 +48,12 @@ const MenuPage: React.FC = () => {
           />
         </div>
         
+        <div className="text-center mb-12 mt-4" data-aos="fade-up" data-aos-delay="500">
+          <p className="text-burgundy italic text-lg">
+            Please note: This is our new menu and some dishes might not be available at the moment.
+          </p>
+        </div>
+        
         <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4 mt-16 mb-24" data-aos="fade-up" data-aos-delay="600">
           <a 
             href={menuPDF}
