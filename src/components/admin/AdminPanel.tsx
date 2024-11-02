@@ -455,13 +455,13 @@ const AdminPanel: React.FC = () => {
                   <div className="h-64 sm:h-96">
                     <Bar
                       data={{
-                        labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
                         datasets: [
                           {
                             label: 'Number of Bookings',
-                            data: weeklyBookings,
-                            backgroundColor: 'rgba(139, 38, 53, 0.5)',
-                            borderColor: 'rgba(139, 38, 53, 1)',
+                            data: weeklyBookings.map(booking => booking.count),
+                            backgroundColor: 'rgba(120, 20, 20, 0.6)',
+                            borderColor: 'rgba(120, 20, 20, 1)',
                             borderWidth: 1,
                           },
                         ],
