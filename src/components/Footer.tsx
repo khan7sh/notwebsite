@@ -28,11 +28,15 @@ const Footer: React.FC = () => {
           <ul className="space-y-2 text-base">
             <li className="flex items-center">
               <Clock className="mr-2 flex-shrink-0" size={18} />
-              <span>Tue-Sun: 8:00 AM - 10:00 PM</span>
+              <span>Monday: Closed</span>
             </li>
             <li className="flex items-center">
               <Clock className="mr-2 flex-shrink-0" size={18} />
-              <span>Mon: Closed</span>
+              <span>Tuesday - Saturday: 8:00 AM - 11:00 PM</span>
+            </li>
+            <li className="flex items-center">
+              <Clock className="mr-2 flex-shrink-0" size={18} />
+              <span>Sunday: 9:00 AM - 10:00 PM</span>
             </li>
           </ul>
         </div>

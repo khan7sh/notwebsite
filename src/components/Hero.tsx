@@ -28,8 +28,12 @@ const Hero: React.FC = () => {
             <table className="text-cream text-sm md:text-base">
               <tbody>
                 <tr>
-                  <td className="px-2 md:px-4 py-1 md:py-2 border-b border-cream">Tuesday - Sunday</td>
-                  <td className="px-2 md:px-4 py-1 md:py-2 border-b border-cream">8:00 AM - 10:00 PM</td>
+                  <td className="px-2 md:px-4 py-1 md:py-2 border-b border-cream">Tuesday - Saturday</td>
+                  <td className="px-2 md:px-4 py-1 md:py-2 border-b border-cream">8:00 AM - 11:00 PM</td>
+                </tr>
+                <tr>
+                  <td className="px-2 md:px-4 py-1 md:py-2 border-b border-cream">Sunday</td>
+                  <td className="px-2 md:px-4 py-1 md:py-2 border-b border-cream">9:00 AM - 10:00 PM</td>
                 </tr>
                 <tr>
                   <td className="px-2 md:px-4 py-1 md:py-2">Monday</td>
