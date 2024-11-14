@@ -62,8 +62,32 @@ const Footer: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="container mx-auto mt-8 pt-8 border-t border-cream border-opacity-20 text-center text-sm">
-        © {new Date().getFullYear()} Noshe Cambridge. All rights reserved.
+      <div className="container mx-auto mt-8 pt-8 border-t border-cream border-opacity-20">
+        <div className="text-center mb-8">
+          <p className="text-sm">© {new Date().getFullYear()} Noshe Cambridge. All rights reserved.</p>
+        </div>
+        
+        <div className="flex flex-col items-center justify-center space-y-4 py-8 px-4 bg-burgundy/30 rounded-xl backdrop-blur-sm">
+          <div className="text-center transform hover:scale-105 transition-transform duration-300">
+            <p className="text-2xl md:text-3xl lg:text-4xl font-serif tracking-wide text-cream/95">
+              Crafted with passion by{' '}
+              <a 
+                href="https://thecraftweb.co.uk" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="text-beige hover:text-cream transition-colors duration-300 font-bold border-b-2 border-beige/20 hover:border-cream/40"
+              >
+                TheCraftWeb
+              </a>
+            </p>
+            <div className="mt-4 max-w-2xl mx-auto">
+              <p className="text-sm md:text-base text-beige/90 italic leading-relaxed">
+                Where culinary artistry meets digital excellence — Transforming gastronomic visions into immersive digital experiences. 
+                Elevating restaurants through bespoke web solutions that capture the essence of their unique flavors and traditions.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </footer>
   )
