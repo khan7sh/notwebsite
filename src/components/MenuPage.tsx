@@ -49,8 +49,12 @@ const MenuPage: React.FC = () => {
         </div>
         
         <div className="text-center mb-12 mt-4" data-aos="fade-up" data-aos-delay="500">
-          <p className="text-burgundy italic text-lg">
+          <p className="text-burgundy italic text-lg mb-2">
             Please note: This is our new menu and some dishes might not be available at the moment.
+          </p>
+          <p className="text-burgundy text-lg">
+            Breakfast service: 9:30 AM - 12:00 PM<br />
+            Lunch & Dinner service: 12:00 PM onwards
           </p>
         </div>
         

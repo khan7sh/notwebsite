@@ -50,6 +50,10 @@ const BookingPage: React.FC = () => {
                   <h3 className="text-xl font-semibold mb-2">Opening Hours</h3>
                   <p className="mb-1">Tuesday - Sunday: 8:00 AM - 10:00 PM</p>
                   <p className="font-bold">Closed on Mondays</p>
+                  <p className="mt-2 text-cream/90">
+                    Breakfast service: 9:30 AM - 12:00 PM<br />
+                    Lunch & Dinner service: 12:00 PM onwards
+                  </p>
                 </div>
                 <div className="mt-4 p-4 bg-cream bg-opacity-20 rounded-lg border-2 border-cream border-opacity-30 text-sm" data-aos="fade-up" data-aos-delay="800">
                   <h3 className="text-xl font-semibold mb-2">Prefer to book by phone?</h3>
