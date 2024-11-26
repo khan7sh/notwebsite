@@ -300,3 +300,25 @@ html, body {
     border-radius: 0;
   }
 }
+
+@keyframes snowfall {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 100px 1000px;
+  }
+}
+
+.animate-snowfall {
+  background-image: 
+    radial-gradient(2px 2px at 20px 30px, #fff 100%, transparent),
+    radial-gradient(2px 2px at 40px 70px, #fff 100%, transparent),
+    radial-gradient(2px 2px at 50px 160px, #fff 100%, transparent),
+    radial-gradient(2px 2px at 90px 40px, #fff 100%, transparent),
+    radial-gradient(2px 2px at 130px 80px, #fff 100%, transparent),
+    radial-gradient(2px 2px at 160px 120px, #fff 100%, transparent);
+  background-repeat: repeat;
+  animation: snowfall 10s linear infinite;
+  opacity: 0.2;
+}

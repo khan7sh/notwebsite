@@ -43,6 +43,23 @@ const Hero: React.FC = () => {
             </table>
           </div>
         </div>
+        <div 
+          className="mb-8 relative" 
+          data-aos="fade-up" 
+          data-aos-delay="350"
+        >
+          <div className="bg-burgundy/80 backdrop-blur-sm p-6 rounded-lg inline-block relative">
+            <div className="absolute inset-0 animate-snowfall pointer-events-none">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent opacity-50"></div>
+            </div>
+            <h3 className="text-cream font-serif text-xl md:text-2xl lg:text-3xl">
+              Book Your Winter Corporate Event
+            </h3>
+            <p className="text-cream/90 text-sm md:text-base mt-2">
+              Perfect for business meetings, team dinners & festive celebrations
+            </p>
+          </div>
+        </div>
         <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4" data-aos="fade-up" data-aos-delay="400">
           <button onClick={handleBookTable} className="btn btn-primary w-full sm:w-auto px-4 sm:px-8">Book a Table</button>
           <a href="https://noshe-orders.pharmix.co.uk/" target="_blank" rel="noopener noreferrer" className="btn btn-secondary w-full sm:w-auto px-4 sm:px-8">Order Online</a>
