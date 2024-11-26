@@ -44,20 +44,22 @@ const Hero: React.FC = () => {
           </div>
         </div>
         <div 
-          className="mb-8 relative" 
+          className="mb-8 relative max-w-3xl mx-auto" 
           data-aos="fade-up" 
           data-aos-delay="350"
         >
-          <div className="bg-burgundy/80 backdrop-blur-sm p-6 rounded-lg inline-block relative">
+          <div className="bg-burgundy/80 backdrop-blur-sm p-8 rounded-lg relative overflow-hidden">
             <div className="absolute inset-0 animate-snowfall pointer-events-none">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white/10 to-transparent opacity-50"></div>
             </div>
-            <h3 className="text-cream font-serif text-xl md:text-2xl lg:text-3xl">
-              Book Your Winter Corporate Event
-            </h3>
-            <p className="text-cream/90 text-sm md:text-base mt-2">
-              Perfect for business meetings, team dinners & festive celebrations
-            </p>
+            <div className="relative z-10">
+              <h3 className="text-cream font-serif text-2xl md:text-3xl lg:text-4xl mb-3">
+                Book Your Winter Corporate Event
+              </h3>
+              <p className="text-cream/90 text-base md:text-lg">
+                Perfect for business meetings, team dinners & festive celebrations
+              </p>
+            </div>
           </div>
         </div>
         <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4" data-aos="fade-up" data-aos-delay="400">
