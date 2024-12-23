@@ -421,7 +421,6 @@ const AdminPanel: React.FC = () => {
                                 <p className="text-sm">Date: {format(new Date(booking.date), 'EEEE, MMMM d, yyyy')}</p>
                                 <p className="text-sm">Time: {booking.timeSlot || booking.time}</p>
                                 <p className="text-sm">Guests: {booking.guests}</p>
-                                <p className="text-sm">Email: {booking.email}</p>
                                 <p className="text-sm">Phone: {booking.phone}</p>
                                 {booking.specialRequests && (
                                   <p className="text-sm text-gray-600">
