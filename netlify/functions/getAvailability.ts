@@ -84,7 +84,7 @@ const handler: Handler = async (event) => {
     ];
 
     // Use Christmas slots if it's December 25th, otherwise use default slots
-    const timeSlots = isChristmas ? CHRISTMAS_TIME_SLOTS : DEFAULT_TIME_SLOTS;
+    let timeSlots = isChristmas ? CHRISTMAS_TIME_SLOTS : DEFAULT_TIME_SLOTS;
 
     // Parse the date and create UTC date objects for start and end of day
     const startOfDay = new Date(Date.UTC(selectedDate.getUTCFullYear(), selectedDate.getUTCMonth(), selectedDate.getUTCDate()));
@@ -117,7 +117,7 @@ const handler: Handler = async (event) => {
     console.log('Found bookings:', bookings);
 
     // Calculate remaining capacity for each time slot
-    const timeSlots = DEFAULT_TIME_SLOTS.map(slot => ({ ...slot }));
+    timeSlots = timeSlots.map(slot => ({ ...slot }));
     
     bookings.forEach(booking => {
       if (!booking.timeSlot) {
