@@ -67,13 +67,22 @@ const BookingForm: React.FC = () => {
     setBookingStatus('confirming');
     setSubmitMessage('');
     
-    const formattedData = {
-      ...data,
-      date: selectedDate.toISOString(),
-      guests: parseInt(data.guests.toString())
-    };
-    
     try {
+      // Validate time slot format
+      if (!data.timeSlot.match(/^\d{2}:\d{2}-\d{2}:\d{2}$/)) {
+        throw new Error('Invalid time slot format');
+      }
+
+      // Format the data before sending
+      const formattedData = {
+        ...data,
+        date: selectedDate.toISOString(),
+        guests: parseInt(data.guests.toString()),
+        timeSlot: data.timeSlot
+      };
+
+      console.log('Submitting booking data:', formattedData);
+      
       const response = await axios.post('/.netlify/functions/bookingConfirmation', formattedData, {
         timeout: 10000
       });
@@ -87,8 +96,14 @@ const BookingForm: React.FC = () => {
         throw new Error(response.data?.message || 'Booking failed');
       }
     } catch (error) {
+      console.error('Booking submission error:', error);
       setBookingStatus('error');
-      setSubmitMessage(error instanceof Error ? error.message : 'There was an error processing your booking. Please try again.');
+      if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || error.message;
+        setSubmitMessage(errorMessage);
+      } else {
+        setSubmitMessage(error instanceof Error ? error.message : 'There was an error processing your booking. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -208,7 +223,7 @@ const BookingForm: React.FC = () => {
           >
             <option value="">Select time slot</option>
             {availableTimeSlots.map((slot) => {
-              const isDisabled = slot.status === 'unavailable' || (selectedGuests && slot.capacity < selectedGuests);
+              const isDisabled: boolean = slot.status === 'unavailable' || Boolean(selectedGuests && slot.capacity < selectedGuests);
               const status = getTimeSlotStatus(slot);
               return (
                 <option 

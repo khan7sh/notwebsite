@@ -13,27 +13,11 @@ const firebaseConfig = {
   databaseURL: "https://bookings-f964e-default-rtdb.europe-west1.firebasedatabase.app",
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
-interface TimeSlot {
-  start: string;
-  end: string;
-  capacity: number;
-  status: 'available' | 'limited' | 'unavailable';
-}
-
-const DEFAULT_TIME_SLOTS: TimeSlot[] = [
-  { start: '09:00', end: '10:45', capacity: 40, status: 'available' },
-  { start: '10:45', end: '12:30', capacity: 40, status: 'available' },
-  { start: '12:30', end: '14:15', capacity: 40, status: 'available' },
-  { start: '14:15', end: '16:00', capacity: 40, status: 'available' },
-  { start: '16:00', end: '17:45', capacity: 40, status: 'available' },
-  { start: '17:45', end: '19:30', capacity: 40, status: 'available' },
-  { start: '19:30', end: '21:15', capacity: 40, status: 'available' },
-  { start: '21:15', end: '23:00', capacity: 40, status: 'available' },
-];
-
+// Initialize Email Transporter
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -43,26 +27,57 @@ const transporter = nodemailer.createTransport({
 });
 
 const handler: Handler = async (event) => {
+  console.log('Received booking request');
+  
   if (event.httpMethod !== 'POST') {
-    return { statusCode: 405, body: JSON.stringify({ success: false, message: 'Method Not Allowed' }) };
+    return { 
+      statusCode: 405, 
+      body: JSON.stringify({ success: false, message: 'Method Not Allowed' }) 
+    };
   }
 
   try {
     const bookingData = JSON.parse(event.body || '{}');
+    console.log('Parsed booking data:', bookingData);
+    
     const { date, timeSlot, guests, name, email, phone, specialRequests } = bookingData;
 
+    // Validate required fields
     if (!date || !timeSlot || !guests || !name || !email || !phone) {
+      console.log('Missing required fields:', { date, timeSlot, guests, name, email, phone });
       return {
         statusCode: 400,
-        body: JSON.stringify({ success: false, message: 'Missing required fields' }),
+        body: JSON.stringify({ 
+          success: false, 
+          message: 'Missing required fields',
+          missingFields: {
+            date: !date,
+            timeSlot: !timeSlot,
+            guests: !guests,
+            name: !name,
+            email: !email,
+            phone: !phone
+          }
+        }),
       };
     }
 
+    // Parse and validate date
     const selectedDate = new Date(date);
+    if (isNaN(selectedDate.getTime())) {
+      console.log('Invalid date format:', date);
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ success: false, message: 'Invalid date format' }),
+      };
+    }
+
     const startOfDay = new Date(Date.UTC(selectedDate.getUTCFullYear(), selectedDate.getUTCMonth(), selectedDate.getUTCDate()));
     const endOfDay = new Date(Date.UTC(selectedDate.getUTCFullYear(), selectedDate.getUTCMonth(), selectedDate.getUTCDate(), 23, 59, 59, 999));
 
     // Get existing bookings for the selected date
+    console.log('Fetching existing bookings for date range:', startOfDay.toISOString(), 'to', endOfDay.toISOString());
+    
     const bookingsRef = ref(database, 'bookings');
     const bookingsQuery = query(
       bookingsRef,
@@ -80,24 +95,30 @@ const handler: Handler = async (event) => {
       }
     });
 
+    console.log('Found existing bookings:', existingBookings);
+
     // Calculate remaining capacity for the selected time slot
     const [selectedStartTime] = timeSlot.split('-');
-    const selectedSlotIndex = DEFAULT_TIME_SLOTS.findIndex(slot => slot.start === selectedStartTime);
+    console.log('Selected start time:', selectedStartTime);
     
-    if (selectedSlotIndex === -1) {
+    // Validate time slot format
+    if (!selectedStartTime || !selectedStartTime.match(/^\d{2}:\d{2}$/)) {
+      console.log('Invalid time slot format:', timeSlot);
       return {
         statusCode: 400,
-        body: JSON.stringify({ success: false, message: 'Invalid time slot selected' }),
+        body: JSON.stringify({ success: false, message: 'Invalid time slot format' }),
       };
     }
 
-    let remainingCapacity = DEFAULT_TIME_SLOTS[selectedSlotIndex].capacity;
+    let remainingCapacity = 40; // Default capacity
     
     existingBookings.forEach(booking => {
-      if (booking.timeSlot.split('-')[0] === selectedStartTime) {
+      if (booking.timeSlot && booking.timeSlot.split('-')[0] === selectedStartTime) {
         remainingCapacity -= booking.guests;
       }
     });
+
+    console.log('Remaining capacity:', remainingCapacity);
 
     // Check if there's enough capacity for the new booking
     if (remainingCapacity < guests) {
@@ -122,64 +143,76 @@ const handler: Handler = async (event) => {
       createdAt: new Date().toISOString(),
     };
 
-    await push(bookingsRef, newBooking);
+    console.log('Saving new booking:', newBooking);
+    const newBookingRef = await push(bookingsRef, newBooking);
+    console.log('Booking saved with ID:', newBookingRef.key);
 
-    // Send confirmation emails
-    const customerEmail = {
-      from: '"Noshe Cambridge" <noshecambridge@gmail.com>',
-      to: email,
-      subject: 'Booking Confirmation - Noshe Cambridge',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #F5EBE0; color: #333;">
-          <h1 style="color: #8B2635; text-align: center;">Booking Confirmation</h1>
-          <p>Dear ${name},</p>
-          <p>Thank you for booking with Noshe Cambridge. Your reservation details are:</p>
-          <div style="background-color: #fff; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <p><strong>Date:</strong> ${new Date(date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-            <p><strong>Time:</strong> ${timeSlot}</p>
-            <p><strong>Number of guests:</strong> ${guests}</p>
-            ${specialRequests ? `<p><strong>Special Requests:</strong> ${specialRequests}</p>` : ''}
+    // Prepare and send confirmation emails
+    try {
+      const customerEmail = {
+        from: '"Noshe Cambridge" <noshecambridge@gmail.com>',
+        to: email,
+        subject: 'Booking Confirmation - Noshe Cambridge',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #F5EBE0; color: #333;">
+            <h1 style="color: #8B2635; text-align: center;">Booking Confirmation</h1>
+            <p>Dear ${name},</p>
+            <p>Thank you for booking with Noshe Cambridge. Your reservation details are:</p>
+            <div style="background-color: #fff; padding: 15px; border-radius: 5px; margin: 20px 0;">
+              <p><strong>Date:</strong> ${new Date(date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              <p><strong>Time:</strong> ${timeSlot}</p>
+              <p><strong>Number of guests:</strong> ${guests}</p>
+              ${specialRequests ? `<p><strong>Special Requests:</strong> ${specialRequests}</p>` : ''}
+            </div>
+            <p>We look forward to welcoming you to Noshe Cambridge!</p>
+            <p style="font-size: 0.9em; color: #666;">If you need to modify or cancel your booking, please call us at 07964 624055.</p>
           </div>
-          <p>We look forward to welcoming you to Noshe Cambridge!</p>
-          <p style="font-size: 0.9em; color: #666;">If you need to modify or cancel your booking, please call us at 07964 624055.</p>
-        </div>
-      `,
-    };
+        `,
+      };
 
-    const managerEmail = {
-      from: '"Noshe Cambridge Bookings" <noshecambridge@gmail.com>',
-      to: 'noshecambridge@gmail.com',
-      subject: 'New Booking - Noshe Cambridge',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #F5EBE0; color: #333;">
-          <h1 style="color: #8B2635; text-align: center;">New Booking Alert</h1>
-          <p>A new booking has been made at Noshe Cambridge:</p>
-          <div style="background-color: #fff; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <h2 style="color: #4A5D23; margin-top: 0;">Booking Details:</h2>
-            <p><strong>Name:</strong> ${name}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Phone:</strong> ${phone}</p>
-            <p><strong>Date:</strong> ${new Date(date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-            <p><strong>Time:</strong> ${timeSlot}</p>
-            <p><strong>Number of guests:</strong> ${guests}</p>
-            ${specialRequests ? `<p><strong>Special Requests:</strong> ${specialRequests}</p>` : ''}
-            <p><strong>Remaining Capacity:</strong> ${remainingCapacity - guests} seats</p>
+      const managerEmail = {
+        from: '"Noshe Cambridge Bookings" <noshecambridge@gmail.com>',
+        to: 'noshecambridge@gmail.com',
+        subject: 'New Booking - Noshe Cambridge',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #F5EBE0; color: #333;">
+            <h1 style="color: #8B2635; text-align: center;">New Booking Alert</h1>
+            <p>A new booking has been made at Noshe Cambridge:</p>
+            <div style="background-color: #fff; padding: 15px; border-radius: 5px; margin: 20px 0;">
+              <h2 style="color: #4A5D23; margin-top: 0;">Booking Details:</h2>
+              <p><strong>Name:</strong> ${name}</p>
+              <p><strong>Email:</strong> ${email}</p>
+              <p><strong>Phone:</strong> ${phone}</p>
+              <p><strong>Date:</strong> ${new Date(date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              <p><strong>Time:</strong> ${timeSlot}</p>
+              <p><strong>Number of guests:</strong> ${guests}</p>
+              ${specialRequests ? `<p><strong>Special Requests:</strong> ${specialRequests}</p>` : ''}
+              <p><strong>Remaining Capacity:</strong> ${remainingCapacity - guests} seats</p>
+            </div>
+            <p>Please ensure the table is prepared accordingly.</p>
           </div>
-          <p>Please ensure the table is prepared accordingly.</p>
-        </div>
-      `,
-    };
+        `,
+      };
 
-    await Promise.all([
-      transporter.sendMail(customerEmail),
-      transporter.sendMail(managerEmail),
-    ]);
+      console.log('Sending confirmation emails');
+      await Promise.all([
+        transporter.sendMail(customerEmail),
+        transporter.sendMail(managerEmail),
+      ]);
+      console.log('Confirmation emails sent successfully');
+
+    } catch (emailError) {
+      console.error('Error sending confirmation emails:', emailError);
+      // Continue execution even if emails fail
+      // We might want to implement a retry mechanism or queue system in the future
+    }
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
         message: 'Booking confirmed successfully! Check your email for confirmation details.',
+        bookingId: newBookingRef.key,
       }),
     };
   } catch (error) {
@@ -189,6 +222,7 @@ const handler: Handler = async (event) => {
       body: JSON.stringify({
         success: false,
         message: 'There was an error processing your booking. Please try again.',
+        error: error instanceof Error ? error.message : 'Unknown error',
       }),
     };
   }
