@@ -13,7 +13,8 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 interface Booking {
   id: string;
   date: string;
-  timeSlot: string;
+  timeSlot?: string;
+  time?: string;
   guests: number;
   name: string;
   email: string;
@@ -78,9 +79,9 @@ const AdminPanel: React.FC = () => {
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Error exporting bookings:', err);
-      setError(`Error exporting bookings: ${err.message}`);
+    } catch (error) {
+      console.error('Error exporting bookings:', error);
+      setError(`Error exporting bookings: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsLoading(false);
     }
@@ -190,9 +191,9 @@ const AdminPanel: React.FC = () => {
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Error exporting bookings:', err);
-      setError(`Error exporting bookings: ${err.message}`);
+    } catch (error) {
+      console.error('Error exporting bookings:', error);
+      setError(`Error exporting bookings: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsLoading(false);
     }
@@ -221,8 +222,15 @@ const AdminPanel: React.FC = () => {
           date: new Date(booking.date)
         }))
         .sort((a: Booking, b: Booking) => {
-          const timeA = a.timeSlot.split('-')[0].split(':').map(Number);
-          const timeB = b.timeSlot.split('-')[0].split(':').map(Number);
+          const getTime = (booking: Booking) => {
+            if (booking.timeSlot) {
+              return booking.timeSlot.split('-')[0];
+            }
+            return booking.time || '00:00';
+          };
+
+          const timeA = getTime(a).split(':').map(Number);
+          const timeB = getTime(b).split(':').map(Number);
           return timeA[0] * 60 + timeA[1] - (timeB[0] * 60 + timeB[1]);
         });
       setDailyBookings(sortedBookings);
@@ -411,7 +419,7 @@ const AdminPanel: React.FC = () => {
                                   <span className="font-semibold">{booking.name}</span>
                                 </div>
                                 <p className="text-sm">Date: {format(new Date(booking.date), 'EEEE, MMMM d, yyyy')}</p>
-                                <p className="text-sm">Time: {booking.timeSlot}</p>
+                                <p className="text-sm">Time: {booking.timeSlot || booking.time}</p>
                                 <p className="text-sm">Guests: {booking.guests}</p>
                                 <p className="text-sm">Email: {booking.email}</p>
                                 <p className="text-sm">Phone: {booking.phone}</p>
