@@ -94,12 +94,31 @@ const BookingForm: React.FC = () => {
 
   const generateTimeOptions = () => {
     const options = [];
-    for (let hour = 9; hour <= 21; hour++) {
-      for (let minute = (hour === 9 ? 30 : 0); minute < 60; minute += 30) {
-        const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+    
+    // Check if the selected date is December 25th
+    const isChristmas = selectedDate.getMonth() === 11 && selectedDate.getDate() === 25;
+    
+    if (isChristmas) {
+      // Special time slots for December 25th
+      const christmasSlots = [
+        '17:00', '17:15', '17:30', '17:45',
+        '19:00', '19:15', '19:30', '19:45',
+        '21:00', '21:15', '21:30', '21:45'
+      ];
+      
+      christmasSlots.forEach(time => {
         options.push(<option key={time} value={time}>{time}</option>);
+      });
+    } else {
+      // Regular time slots for other days
+      for (let hour = 9; hour <= 21; hour++) {
+        for (let minute = (hour === 9 ? 30 : 0); minute < 60; minute += 30) {
+          const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+          options.push(<option key={time} value={time}>{time}</option>);
+        }
       }
     }
+    
     return options;
   };
 
@@ -120,10 +139,12 @@ const BookingForm: React.FC = () => {
           render={({ field }) => (
             <DatePicker
               selected={selectedDate}
-              onChange={(date: Date) => {
-                const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-                setSelectedDate(utcDate);
-                field.onChange(utcDate.toISOString());
+              onChange={(date: Date | null) => {
+                if (date) {
+                  const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+                  setSelectedDate(utcDate);
+                  field.onChange(utcDate.toISOString());
+                }
               }}
               filterDate={isWeekday}
               inline
