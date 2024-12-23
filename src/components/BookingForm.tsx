@@ -4,33 +4,73 @@ import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
 import axios from 'axios';
 
+interface TimeSlot {
+  start: string;
+  end: string;
+  capacity: number;
+  status: 'available' | 'limited' | 'unavailable';
+}
+
+interface BookingFormData {
+  date: string;
+  timeSlot: string;
+  guests: number;
+  name: string;
+  email: string;
+  phone: string;
+  specialRequests?: string;
+}
+
+const DEFAULT_TIME_SLOTS: TimeSlot[] = [
+  { start: '09:00', end: '10:45', capacity: 40, status: 'available' },
+  { start: '10:45', end: '12:30', capacity: 40, status: 'available' },
+  { start: '12:30', end: '14:15', capacity: 40, status: 'available' },
+  { start: '14:15', end: '16:00', capacity: 40, status: 'available' },
+  { start: '16:00', end: '17:45', capacity: 40, status: 'available' },
+  { start: '17:45', end: '19:30', capacity: 40, status: 'available' },
+  { start: '19:30', end: '21:15', capacity: 40, status: 'available' },
+  { start: '21:15', end: '23:00', capacity: 40, status: 'available' },
+];
+
 const BookingForm: React.FC = () => {
-  const { register, handleSubmit, control, formState: { errors }, reset } = useForm();
+  const { register, handleSubmit, control, formState: { errors }, reset, watch } = useForm<BookingFormData>();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingStatus, setBookingStatus] = useState<'idle' | 'confirming' | 'success' | 'error'>('idle');
   const [submitMessage, setSubmitMessage] = useState('');
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>(DEFAULT_TIME_SLOTS);
 
+  const selectedGuests = watch('guests');
+
+  // Fetch available time slots whenever date changes
   useEffect(() => {
-    if (bookingStatus === 'success') {
-      // Scroll to the top of the booking form container
-      const formContainer = document.querySelector('.booking-form-container');
-      if (formContainer) {
-        formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const fetchAvailability = async () => {
+      try {
+        const response = await axios.post('/.netlify/functions/getAvailability', {
+          date: selectedDate.toISOString()
+        });
+        
+        if (response.data && response.data.timeSlots) {
+          setAvailableTimeSlots(response.data.timeSlots);
+        }
+      } catch (error) {
+        console.error('Error fetching availability:', error);
+        setAvailableTimeSlots(DEFAULT_TIME_SLOTS);
       }
-    }
-  }, [bookingStatus]);
+    };
 
-  const onSubmit = async (data: any) => {
+    fetchAvailability();
+  }, [selectedDate]);
+
+  const onSubmit = async (data: BookingFormData) => {
     setIsSubmitting(true);
     setBookingStatus('confirming');
     setSubmitMessage('');
     
-    // Format the data before sending
     const formattedData = {
       ...data,
       date: selectedDate.toISOString(),
-      guests: parseInt(data.guests)
+      guests: parseInt(data.guests.toString())
     };
     
     try {
@@ -48,10 +88,33 @@ const BookingForm: React.FC = () => {
       }
     } catch (error) {
       setBookingStatus('error');
-      setSubmitMessage('There was an error processing your booking. Please try again.');
+      setSubmitMessage(error instanceof Error ? error.message : 'There was an error processing your booking. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const isWeekday = (date: Date) => {
+    const day = date.getDay();
+    return day !== 1; // 1 represents Monday
+  };
+
+  const getTimeSlotStatus = (slot: TimeSlot) => {
+    if (slot.status === 'unavailable') return 'No seats available';
+    if (slot.status === 'limited') return `Only ${slot.capacity} seats left`;
+    return `${slot.capacity} seats available`;
+  };
+
+  const getTimeSlotClassName = (slot: TimeSlot) => {
+    const baseClass = "block w-full px-4 py-3 rounded-md border shadow-sm focus:ring focus:ring-opacity-50 transition duration-150 ease-in-out ";
+    
+    if (slot.status === 'unavailable' || (selectedGuests && slot.capacity < selectedGuests)) {
+      return baseClass + 'bg-gray-100 text-gray-500 border-gray-300 cursor-not-allowed';
+    }
+    if (slot.status === 'limited') {
+      return baseClass + 'border-yellow-300 focus:border-yellow-500 focus:ring-yellow-500';
+    }
+    return baseClass + 'border-gray-300 focus:border-burgundy focus:ring-burgundy';
   };
 
   if (bookingStatus === 'success') {
@@ -73,7 +136,6 @@ const BookingForm: React.FC = () => {
           onClick={() => {
             setBookingStatus('idle');
             setSubmitMessage('');
-            // Scroll to top of form container when making another booking
             const formContainer = document.querySelector('.booking-form-container');
             if (formContainer) {
               formContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -86,41 +148,6 @@ const BookingForm: React.FC = () => {
       </div>
     );
   }
-
-  const isWeekday = (date: Date) => {
-    const day = date.getDay();
-    return day !== 1; // 1 represents Monday
-  };
-
-  const generateTimeOptions = () => {
-    const options = [];
-    
-    // Check if the selected date is December 25th
-    const isChristmas = selectedDate.getMonth() === 11 && selectedDate.getDate() === 25;
-    
-    if (isChristmas) {
-      // Special time slots for December 25th
-      const christmasSlots = [
-        '17:00', '17:15', '17:30', '17:45',
-        '19:00', '19:15', '19:30', '19:45',
-        '21:00', '21:15', '21:30', '21:45'
-      ];
-      
-      christmasSlots.forEach(time => {
-        options.push(<option key={time} value={time}>{time}</option>);
-      });
-    } else {
-      // Regular time slots for other days
-      for (let hour = 9; hour <= 21; hour++) {
-        for (let minute = (hour === 9 ? 30 : 0); minute < 60; minute += 30) {
-          const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-          options.push(<option key={time} value={time}>{time}</option>);
-        }
-      }
-    }
-    
-    return options;
-  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="booking-form-container space-y-6">
@@ -158,31 +185,43 @@ const BookingForm: React.FC = () => {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-          <select
-            id="time"
-            {...register("time", { required: "Time is required" })}
-            className="block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-burgundy focus:ring focus:ring-burgundy focus:ring-opacity-50 transition duration-150 ease-in-out"
-          >
-            <option value="">Select time</option>
-            {generateTimeOptions()}
-          </select>
-          {errors.time && <p className="mt-1 text-sm text-red-600">{errors.time.message as string}</p>}
-        </div>
-
-        <div>
-          <label htmlFor="guests" className="block text-sm font-medium text-gray-700 mb-1">Guests</label>
+          <label htmlFor="guests" className="block text-sm font-medium text-gray-700 mb-1">Number of Guests</label>
           <select
             id="guests"
             {...register("guests", { required: "Number of guests is required" })}
             className="block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-burgundy focus:ring focus:ring-burgundy focus:ring-opacity-50 transition duration-150 ease-in-out"
           >
             <option value="">Select guests</option>
-            {[...Array(14)].map((_, i) => (
+            {[...Array(40)].map((_, i) => (
               <option key={i + 1} value={i + 1}>{i + 1} {i === 0 ? 'guest' : 'guests'}</option>
             ))}
           </select>
           {errors.guests && <p className="mt-1 text-sm text-red-600">{errors.guests.message as string}</p>}
+        </div>
+
+        <div>
+          <label htmlFor="timeSlot" className="block text-sm font-medium text-gray-700 mb-1">Time Slot</label>
+          <select
+            id="timeSlot"
+            {...register("timeSlot", { required: "Time slot is required" })}
+            className="block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-burgundy focus:ring focus:ring-burgundy focus:ring-opacity-50 transition duration-150 ease-in-out"
+          >
+            <option value="">Select time slot</option>
+            {availableTimeSlots.map((slot) => {
+              const isDisabled = slot.status === 'unavailable' || (selectedGuests && slot.capacity < selectedGuests);
+              return (
+                <option 
+                  key={`${slot.start}-${slot.end}`}
+                  value={`${slot.start}-${slot.end}`}
+                  disabled={isDisabled}
+                  className={getTimeSlotClassName(slot)}
+                >
+                  {`${slot.start} - ${slot.end} (${getTimeSlotStatus(slot)})`}
+                </option>
+              );
+            })}
+          </select>
+          {errors.timeSlot && <p className="mt-1 text-sm text-red-600">{errors.timeSlot.message as string}</p>}
         </div>
       </div>
 
@@ -202,7 +241,10 @@ const BookingForm: React.FC = () => {
         <input
           type="email"
           id="email"
-          {...register("email", { required: "Email is required", pattern: { value: /^\S+@\S+$/i, message: "Invalid email address" } })}
+          {...register("email", { 
+            required: "Email is required", 
+            pattern: { value: /^\S+@\S+$/i, message: "Invalid email address" } 
+          })}
           className="block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-burgundy focus:ring focus:ring-burgundy focus:ring-opacity-50 transition duration-150 ease-in-out"
         />
         {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message as string}</p>}
@@ -213,7 +255,10 @@ const BookingForm: React.FC = () => {
         <input
           type="tel"
           id="phone"
-          {...register("phone", { required: "Phone number is required", pattern: { value: /^[0-9+\-\s()]+$/, message: "Invalid phone number" } })}
+          {...register("phone", { 
+            required: "Phone number is required",
+            pattern: { value: /^[0-9+\-\s()]+$/, message: "Invalid phone number" }
+          })}
           className="block w-full px-4 py-3 rounded-md border-gray-300 shadow-sm focus:border-burgundy focus:ring focus:ring-burgundy focus:ring-opacity-50 transition duration-150 ease-in-out"
         />
         {errors.phone && <p className="mt-1 text-sm text-red-600">{errors.phone.message as string}</p>}
