@@ -138,15 +138,13 @@ const BookingForm: React.FC = () => {
   };
 
   const getTimeSlotClassName = (slot: TimeSlot) => {
-    const baseClass = "block w-full px-4 py-3 rounded-md border shadow-sm focus:ring focus:ring-opacity-50 transition duration-150 ease-in-out ";
-    
     if (slot.status === 'unavailable' || (selectedGuests && slot.capacity < selectedGuests)) {
-      return baseClass + 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-50';
+      return 'text-gray-400 bg-gray-100 cursor-not-allowed opacity-60';
     }
     if (slot.status === 'limited') {
-      return baseClass + 'border-yellow-300 focus:border-yellow-500 focus:ring-yellow-500 bg-yellow-50';
+      return 'text-yellow-800 bg-yellow-50';
     }
-    return baseClass + 'border-gray-300 focus:border-burgundy focus:ring-burgundy';
+    return '';
   };
 
   if (bookingStatus === 'success') {
@@ -242,14 +240,16 @@ const BookingForm: React.FC = () => {
             {availableTimeSlots.map((slot) => {
               const isDisabled = slot.status === 'unavailable' || Boolean(selectedGuests && slot.capacity < selectedGuests);
               const status = getTimeSlotStatus(slot);
+              const className = getTimeSlotClassName(slot);
               return (
                 <option 
                   key={`${slot.start}-${slot.end}`}
                   value={`${slot.start}-${slot.end}`}
                   disabled={isDisabled}
-                  className={`${getTimeSlotClassName(slot)} ${isDisabled ? 'text-gray-400 bg-gray-100' : ''}`}
+                  className={className}
+                  style={isDisabled ? { color: '#9CA3AF', backgroundColor: '#F3F4F6' } : undefined}
                 >
-                  {`${slot.start} - ${slot.end}${status ? ` (${status})` : ''}`}
+                  {`${slot.start} - ${slot.end}${status ? ` ${status}` : ''}`}
                 </option>
               );
             })}

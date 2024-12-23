@@ -60,9 +60,40 @@ const handler: Handler = async (event) => {
 
   try {
     const { date } = JSON.parse(event.body || '{}');
+    
+    if (!date) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ 
+          success: false, 
+          message: 'Date is required',
+          timeSlots: DEFAULT_TIME_SLOTS 
+        })
+      };
+    }
+
+    // Parse the date and create UTC date objects for start and end of day
     const selectedDate = new Date(date);
+    
+    if (isNaN(selectedDate.getTime())) {
+      console.error('Invalid date format received:', date);
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ 
+          success: false, 
+          message: 'Invalid date format',
+          timeSlots: DEFAULT_TIME_SLOTS 
+        })
+      };
+    }
+
     const startOfDay = new Date(Date.UTC(selectedDate.getUTCFullYear(), selectedDate.getUTCMonth(), selectedDate.getUTCDate()));
     const endOfDay = new Date(Date.UTC(selectedDate.getUTCFullYear(), selectedDate.getUTCMonth(), selectedDate.getUTCDate(), 23, 59, 59, 999));
+
+    console.log('Fetching bookings for date range:', {
+      startOfDay: startOfDay.toISOString(),
+      endOfDay: endOfDay.toISOString()
+    });
 
     // Get all bookings for the selected date
     const bookingsRef = ref(database, 'bookings');
@@ -75,6 +106,7 @@ const handler: Handler = async (event) => {
 
     const snapshot = await get(bookingsQuery);
     const bookings: any[] = [];
+    
     snapshot.forEach((childSnapshot) => {
       const booking = childSnapshot.val();
       if (booking && booking.date) {
@@ -82,10 +114,17 @@ const handler: Handler = async (event) => {
       }
     });
 
+    console.log('Found bookings:', bookings);
+
     // Calculate remaining capacity for each time slot
     const timeSlots = DEFAULT_TIME_SLOTS.map(slot => ({ ...slot }));
     
     bookings.forEach(booking => {
+      if (!booking.timeSlot) {
+        console.warn('Booking missing timeSlot:', booking);
+        return;
+      }
+
       const [startTime] = booking.timeSlot.split('-');
       const slotIndex = timeSlots.findIndex(slot => slot.start === startTime);
       
@@ -106,6 +145,7 @@ const handler: Handler = async (event) => {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache'
       },
       body: JSON.stringify({ 
         success: true, 
@@ -114,15 +154,16 @@ const handler: Handler = async (event) => {
       }),
     };
   } catch (error) {
-    console.error('Error fetching availability:', error);
+    console.error('Error in getAvailability:', error);
     return {
       statusCode: 500,
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({ 
         success: false, 
-        error: 'Failed to fetch availability',
+        message: 'Failed to fetch availability',
+        error: error instanceof Error ? error.message : 'Unknown error',
         timeSlots: DEFAULT_TIME_SLOTS 
       }),
     };
