@@ -51,6 +51,12 @@ const sendEmail = async (mailOptions: any) => {
   }
 };
 
+const CHRISTMAS_TIME_SLOTS = [
+  '17:00-18:45',
+  '19:00-20:45',
+  '21:00-22:45'
+];
+
 const handler: Handler = async (event) => {
   console.log('Received booking request');
   
@@ -144,6 +150,20 @@ const handler: Handler = async (event) => {
     });
 
     console.log('Remaining capacity:', remainingCapacity);
+
+    // Check if it's Christmas day
+    const isChristmas = selectedDate.getMonth() === 11 && selectedDate.getDate() === 25;
+
+    // Validate time slot for Christmas day
+    if (isChristmas && !CHRISTMAS_TIME_SLOTS.includes(timeSlot)) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ 
+          success: false, 
+          message: 'Invalid time slot for Christmas day. Only specific time slots are available.' 
+        }),
+      };
+    }
 
     // Check if there's enough capacity for the new booking
     if (remainingCapacity < guests) {

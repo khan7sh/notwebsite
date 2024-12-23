@@ -72,21 +72,21 @@ const handler: Handler = async (event) => {
       };
     }
 
-    // Parse the date and create UTC date objects for start and end of day
+    // Parse the date and check if it's December 25th
     const selectedDate = new Date(date);
-    
-    if (isNaN(selectedDate.getTime())) {
-      console.error('Invalid date format received:', date);
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ 
-          success: false, 
-          message: 'Invalid date format',
-          timeSlots: DEFAULT_TIME_SLOTS 
-        })
-      };
-    }
+    const isChristmas = selectedDate.getMonth() === 11 && selectedDate.getDate() === 25;
 
+    // Define Christmas day time slots
+    const CHRISTMAS_TIME_SLOTS = [
+      { start: '17:00', end: '18:45', capacity: 40, status: 'available' },
+      { start: '19:00', end: '20:45', capacity: 40, status: 'available' },
+      { start: '21:00', end: '22:45', capacity: 40, status: 'available' }
+    ];
+
+    // Use Christmas slots if it's December 25th, otherwise use default slots
+    const timeSlots = isChristmas ? CHRISTMAS_TIME_SLOTS : DEFAULT_TIME_SLOTS;
+
+    // Parse the date and create UTC date objects for start and end of day
     const startOfDay = new Date(Date.UTC(selectedDate.getUTCFullYear(), selectedDate.getUTCMonth(), selectedDate.getUTCDate()));
     const endOfDay = new Date(Date.UTC(selectedDate.getUTCFullYear(), selectedDate.getUTCMonth(), selectedDate.getUTCDate(), 23, 59, 59, 999));
 
