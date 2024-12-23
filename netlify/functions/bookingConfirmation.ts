@@ -21,10 +21,33 @@ const database = getDatabase(app);
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: process.env.EMAIL_USER || 'noshecambridge@gmail.com',
+    pass: process.env.EMAIL_APP_PASSWORD, // Use app-specific password
   },
+  tls: {
+    rejectUnauthorized: false
+  }
 });
+
+// Verify email configuration on startup
+transporter.verify(function(error, success) {
+  if (error) {
+    console.error('Email configuration error:', error);
+  } else {
+    console.log('Email server is ready to send messages');
+  }
+});
+
+const sendEmail = async (mailOptions: any) => {
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Email sent successfully:', info.response);
+    return true;
+  } catch (error) {
+    console.error('Error sending email:', error);
+    throw error;
+  }
+};
 
 const handler: Handler = async (event) => {
   console.log('Received booking request');
@@ -148,9 +171,13 @@ const handler: Handler = async (event) => {
     console.log('Booking saved with ID:', newBookingRef.key);
 
     // Prepare and send confirmation emails
+    let emailError = null;
     try {
       const customerEmail = {
-        from: '"Noshe Cambridge" <noshecambridge@gmail.com>',
+        from: {
+          name: 'Noshe Cambridge',
+          address: 'noshecambridge@gmail.com'
+        },
         to: email,
         subject: 'Booking Confirmation - Noshe Cambridge',
         html: `
@@ -168,10 +195,14 @@ const handler: Handler = async (event) => {
             <p style="font-size: 0.9em; color: #666;">If you need to modify or cancel your booking, please call us at 07964 624055.</p>
           </div>
         `,
+        replyTo: 'noshecambridge@gmail.com'
       };
 
       const managerEmail = {
-        from: '"Noshe Cambridge Bookings" <noshecambridge@gmail.com>',
+        from: {
+          name: 'Noshe Cambridge Bookings',
+          address: 'noshecambridge@gmail.com'
+        },
         to: 'noshecambridge@gmail.com',
         subject: 'New Booking - Noshe Cambridge',
         html: `
@@ -192,29 +223,34 @@ const handler: Handler = async (event) => {
             <p>Please ensure the table is prepared accordingly.</p>
           </div>
         `,
+        replyTo: email // Set reply-to as customer's email
       };
 
       console.log('Sending confirmation emails');
       await Promise.all([
-        transporter.sendMail(customerEmail),
-        transporter.sendMail(managerEmail),
+        sendEmail(customerEmail),
+        sendEmail(managerEmail)
       ]);
       console.log('Confirmation emails sent successfully');
 
-    } catch (emailError) {
-      console.error('Error sending confirmation emails:', emailError);
-      // Continue execution even if emails fail
-      // We might want to implement a retry mechanism or queue system in the future
+    } catch (error) {
+      console.error('Error sending confirmation emails:', error);
+      emailError = error;
     }
 
+    // Return success even if email fails, but include email error in response
     return {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
-        message: 'Booking confirmed successfully! Check your email for confirmation details.',
+        message: emailError 
+          ? 'Booking confirmed successfully, but there was an issue sending confirmation emails. Our team will contact you shortly.'
+          : 'Booking confirmed successfully! Check your email for confirmation details.',
         bookingId: newBookingRef.key,
+        emailError: emailError ? String(emailError) : null
       }),
     };
+
   } catch (error) {
     console.error('Error processing booking:', error);
     return {
