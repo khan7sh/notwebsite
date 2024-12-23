@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, BarChart2, LogOut, Menu, Download, User } from 'lucide-react';
+import { Calendar, BarChart2, LogOut, Menu, Download, User, Edit, Trash2, Loader } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
@@ -10,19 +10,36 @@ import EditBookingModal from './EditBookingModal';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
+interface Booking {
+  id: string;
+  date: string;
+  timeSlot: string;
+  guests: number;
+  name: string;
+  email: string;
+  phone: string;
+  specialRequests?: string;
+  createdAt: string;
+}
+
+interface WeeklyBooking {
+  date: Date;
+  count: number;
+}
+
 const AdminPanel: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'bookings' | 'reportdata'>('bookings');
   const navigate = useNavigate();
   const [selectedWeek, setSelectedWeek] = useState<Date>(startOfWeek(new Date(), { weekStartsOn: 2 }));
-  const [weeklyBookings, setWeeklyBookings] = useState<number[]>([]);
+  const [weeklyBookings, setWeeklyBookings] = useState<WeeklyBooking[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [dailyBookings, setDailyBookings] = useState<any[]>([]);
+  const [dailyBookings, setDailyBookings] = useState<Booking[]>([]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [cancellingBookingId, setCancellingBookingId] = useState<string | null>(null);
-  const [editingBooking, setEditingBooking] = useState<any>(null);
+  const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
 
   useEffect(() => {
     const isLoggedIn = localStorage.getItem('isAdminLoggedIn');
@@ -79,7 +96,6 @@ const AdminPanel: React.FC = () => {
     try {
       const start = startOfWeek(date, { weekStartsOn: 2 });
       const end = endOfWeek(date, { weekStartsOn: 2 });
-      console.log('Fetching bookings for date range:', start.toISOString(), 'to', end.toISOString());
       
       const response = await fetch('/.netlify/functions/getWeeklyBookings', {
         method: 'POST',
@@ -92,7 +108,12 @@ const AdminPanel: React.FC = () => {
       if (!response.ok) {
         if (response.status === 404) {
           console.log('No data found for the selected week');
-          setWeeklyBookings([0, 0, 0, 0, 0, 0, 0]);
+          const emptyWeek: WeeklyBooking[] = Array(7).fill(null).map((_, index) => {
+            const day = new Date(start);
+            day.setDate(day.getDate() + index);
+            return { date: day, count: 0 };
+          });
+          setWeeklyBookings(emptyWeek);
         } else {
           const errorText = await response.text();
           console.error('Error response:', response.status, errorText);
@@ -100,18 +121,22 @@ const AdminPanel: React.FC = () => {
         }
       } else {
         const data = await response.json();
-        console.log('Received data:', data);
-        const adjustedBookings = data.bookings.map((count: number, index: number) => {
+        const adjustedBookings: WeeklyBooking[] = data.bookings.map((count: number, index: number) => {
           const day = new Date(start);
           day.setDate(day.getDate() + index);
           return { date: day, count };
         });
         setWeeklyBookings(adjustedBookings);
       }
-    } catch (err) {
-      console.error('Error fetching weekly bookings:', err);
-      setError(`Error fetching weekly bookings: ${err instanceof Error ? err.message : String(err)}`);
-      setWeeklyBookings([]);
+    } catch (error) {
+      console.error('Error fetching weekly bookings:', error);
+      setError(`Error fetching weekly bookings: ${error instanceof Error ? error.message : String(error)}`);
+      const emptyWeek: WeeklyBooking[] = Array(7).fill(null).map((_, index) => {
+        const day = new Date(startOfWeek(date, { weekStartsOn: 2 }));
+        day.setDate(day.getDate() + index);
+        return { date: day, count: 0 };
+      });
+      setWeeklyBookings(emptyWeek);
     } finally {
       setIsLoading(false);
     }
@@ -191,19 +216,19 @@ const AdminPanel: React.FC = () => {
 
       const data = await response.json();
       const sortedBookings = data.bookings
-        .map(booking => ({
+        .map((booking: Booking) => ({
           ...booking,
           date: new Date(booking.date)
         }))
-        .sort((a, b) => {
-          const timeA = a.time.split(':').map(Number);
-          const timeB = b.time.split(':').map(Number);
+        .sort((a: Booking, b: Booking) => {
+          const timeA = a.timeSlot.split('-')[0].split(':').map(Number);
+          const timeB = b.timeSlot.split('-')[0].split(':').map(Number);
           return timeA[0] * 60 + timeA[1] - (timeB[0] * 60 + timeB[1]);
         });
       setDailyBookings(sortedBookings);
-    } catch (err) {
-      console.error('Error fetching daily bookings:', err);
-      setError(`Error fetching daily bookings: ${err instanceof Error ? err.message : String(err)}`);
+    } catch (error) {
+      console.error('Error fetching daily bookings:', error);
+      setError(`Error fetching daily bookings: ${error instanceof Error ? error.message : String(error)}`);
     } finally {
       setIsLoading(false);
     }
@@ -234,24 +259,24 @@ const AdminPanel: React.FC = () => {
         }
 
         setSuccessMessage('Booking cancelled successfully');
-        setTimeout(() => setSuccessMessage(null), 3000); // Clear the message after 3 seconds
+        setTimeout(() => setSuccessMessage(null), 3000);
 
         // Refresh the bookings list
         fetchDailyBookings(selectedDate);
-      } catch (err) {
-        console.error('Error cancelling booking:', err);
-        setError(`Error cancelling booking: ${err instanceof Error ? err.message : String(err)}`);
+      } catch (error) {
+        console.error('Error cancelling booking:', error);
+        setError(`Error cancelling booking: ${error instanceof Error ? error.message : String(error)}`);
       } finally {
         setCancellingBookingId(null);
       }
     }
   };
 
-  const handleEditBooking = (booking: any) => {
+  const handleEditBooking = (booking: Booking) => {
     setEditingBooking(booking);
   };
 
-  const handleSaveEditedBooking = async (updatedBooking: any) => {
+  const handleSaveEditedBooking = async (updatedBooking: Booking) => {
     try {
       const response = await fetch('/.netlify/functions/editBooking', {
         method: 'POST',
@@ -376,7 +401,7 @@ const AdminPanel: React.FC = () => {
                     <p>No bookings for this date.</p>
                   ) : (
                     <ul className="space-y-4">
-                      {dailyBookings.map((booking, index) => (
+                      {dailyBookings.map((booking: Booking, index: number) => (
                         <li key={index} className="border-b pb-4 last:border-b-0">
                           <div className="flex flex-col space-y-3">
                             <div className="flex items-start justify-between">
@@ -385,32 +410,34 @@ const AdminPanel: React.FC = () => {
                                   <User className="mr-2 flex-shrink-0" size={18} />
                                   <span className="font-semibold">{booking.name}</span>
                                 </div>
-                                <p className="text-sm">Date: {format(new Date(booking.date), 'yyyy-MM-dd', { timeZone: 'UTC' })}</p>
-                                <p className="text-sm">Time: {booking.time}</p>
+                                <p className="text-sm">Date: {format(new Date(booking.date), 'EEEE, MMMM d, yyyy')}</p>
+                                <p className="text-sm">Time: {booking.timeSlot}</p>
                                 <p className="text-sm">Guests: {booking.guests}</p>
+                                <p className="text-sm">Email: {booking.email}</p>
+                                <p className="text-sm">Phone: {booking.phone}</p>
                                 {booking.specialRequests && (
                                   <p className="text-sm text-gray-600">
                                     Special Requests: {booking.specialRequests}
                                   </p>
                                 )}
                               </div>
-                              <div className="flex flex-col space-y-2">
-                                <button
-                                  onClick={() => handleCancelBooking(booking.id)}
-                                  disabled={cancellingBookingId === booking.id}
-                                  className={`px-3 py-1 rounded-md transition-colors ${
-                                    cancellingBookingId === booking.id
-                                      ? 'bg-gray-400 cursor-not-allowed'
-                                      : 'bg-red-500 hover:bg-red-600'
-                                  } text-white`}
-                                >
-                                  {cancellingBookingId === booking.id ? 'Cancelling...' : 'Cancel'}
-                                </button>
+                              <div className="flex space-x-2">
                                 <button
                                   onClick={() => handleEditBooking(booking)}
-                                  className="px-3 py-1 rounded-md transition-colors bg-blue-500 hover:bg-blue-600 text-white"
+                                  className="text-blue-600 hover:text-blue-800"
                                 >
-                                  Edit
+                                  <Edit size={18} />
+                                </button>
+                                <button
+                                  onClick={() => handleCancelBooking(booking.id)}
+                                  className="text-red-600 hover:text-red-800"
+                                  disabled={cancellingBookingId === booking.id}
+                                >
+                                  {cancellingBookingId === booking.id ? (
+                                    <Loader className="animate-spin" size={18} />
+                                  ) : (
+                                    <Trash2 size={18} />
+                                  )}
                                 </button>
                               </div>
                             </div>

@@ -100,9 +100,9 @@ const BookingForm: React.FC = () => {
   };
 
   const getTimeSlotStatus = (slot: TimeSlot) => {
-    if (slot.status === 'unavailable') return 'No seats available';
-    if (slot.status === 'limited') return `Only ${slot.capacity} seats left`;
-    return `${slot.capacity} seats available`;
+    if (slot.status === 'unavailable') return 'Fully Booked';
+    if (slot.status === 'limited') return 'Limited Availability';
+    return '';
   };
 
   const getTimeSlotClassName = (slot: TimeSlot) => {
@@ -209,6 +209,7 @@ const BookingForm: React.FC = () => {
             <option value="">Select time slot</option>
             {availableTimeSlots.map((slot) => {
               const isDisabled = slot.status === 'unavailable' || (selectedGuests && slot.capacity < selectedGuests);
+              const status = getTimeSlotStatus(slot);
               return (
                 <option 
                   key={`${slot.start}-${slot.end}`}
@@ -216,7 +217,7 @@ const BookingForm: React.FC = () => {
                   disabled={isDisabled}
                   className={getTimeSlotClassName(slot)}
                 >
-                  {`${slot.start} - ${slot.end} (${getTimeSlotStatus(slot)})`}
+                  {`${slot.start} - ${slot.end}${status ? ` (${status})` : ''}`}
                 </option>
               );
             })}
