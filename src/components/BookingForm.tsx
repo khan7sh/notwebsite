@@ -132,8 +132,8 @@ const BookingForm: React.FC = () => {
   };
 
   const getTimeSlotStatus = (slot: TimeSlot) => {
-    if (slot.status === 'unavailable') return 'Fully Booked';
-    if (slot.status === 'limited') return 'Limited Availability';
+    if (slot.status === 'unavailable') return '(Fully Booked)';
+    if (slot.status === 'limited') return '(Limited Seats)';
     return '';
   };
 
@@ -141,10 +141,10 @@ const BookingForm: React.FC = () => {
     const baseClass = "block w-full px-4 py-3 rounded-md border shadow-sm focus:ring focus:ring-opacity-50 transition duration-150 ease-in-out ";
     
     if (slot.status === 'unavailable' || (selectedGuests && slot.capacity < selectedGuests)) {
-      return baseClass + 'bg-gray-100 text-gray-500 border-gray-300 cursor-not-allowed';
+      return baseClass + 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-50';
     }
     if (slot.status === 'limited') {
-      return baseClass + 'border-yellow-300 focus:border-yellow-500 focus:ring-yellow-500';
+      return baseClass + 'border-yellow-300 focus:border-yellow-500 focus:ring-yellow-500 bg-yellow-50';
     }
     return baseClass + 'border-gray-300 focus:border-burgundy focus:ring-burgundy';
   };
@@ -240,14 +240,14 @@ const BookingForm: React.FC = () => {
           >
             <option value="">Select time slot</option>
             {availableTimeSlots.map((slot) => {
-              const isDisabled: boolean = slot.status === 'unavailable' || Boolean(selectedGuests && slot.capacity < selectedGuests);
+              const isDisabled = slot.status === 'unavailable' || Boolean(selectedGuests && slot.capacity < selectedGuests);
               const status = getTimeSlotStatus(slot);
               return (
                 <option 
                   key={`${slot.start}-${slot.end}`}
                   value={`${slot.start}-${slot.end}`}
                   disabled={isDisabled}
-                  className={getTimeSlotClassName(slot)}
+                  className={`${getTimeSlotClassName(slot)} ${isDisabled ? 'text-gray-400 bg-gray-100' : ''}`}
                 >
                   {`${slot.start} - ${slot.end}${status ? ` (${status})` : ''}`}
                 </option>
