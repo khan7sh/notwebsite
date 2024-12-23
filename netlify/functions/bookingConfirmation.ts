@@ -183,19 +183,71 @@ const handler: Handler = async (event) => {
         to: email,
         subject: 'Booking Confirmation - Noshe Cambridge',
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #F5EBE0; color: #333;">
-            <h1 style="color: #8B2635; text-align: center;">Booking Confirmation</h1>
-            <p>Dear ${name},</p>
-            <p>Thank you for booking with Noshe Cambridge. Your reservation details are:</p>
-            <div style="background-color: #fff; padding: 15px; border-radius: 5px; margin: 20px 0;">
-              <p><strong>Date:</strong> ${new Date(date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-              <p><strong>Time:</strong> ${timeSlot}</p>
-              <p><strong>Number of guests:</strong> ${guests}</p>
-              ${specialRequests ? `<p><strong>Special Requests:</strong> ${specialRequests}</p>` : ''}
-            </div>
-            <p>We look forward to welcoming you to Noshe Cambridge!</p>
-            <p style="font-size: 0.9em; color: #666;">If you need to modify or cancel your booking, please call us at 07964 624055.</p>
-          </div>
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Booking Confirmation</title>
+            </head>
+            <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; line-height: 1.6; background-color: #f5f5f5;">
+              <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                <div style="background-color: #8B2635; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+                  <h1 style="color: #ffffff; margin: 0; font-size: 28px;">Booking Confirmation</h1>
+                </div>
+                
+                <div style="background-color: #ffffff; padding: 30px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                  <p style="margin-bottom: 20px; font-size: 16px;">Dear <strong>${name}</strong>,</p>
+                  
+                  <p style="margin-bottom: 25px; font-size: 16px;">Thank you for choosing Noshe Cambridge. We're delighted to confirm your reservation.</p>
+                  
+                  <div style="background-color: #f8f4f4; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
+                    <h2 style="color: #8B2635; margin-top: 0; margin-bottom: 15px; font-size: 20px;">Reservation Details</h2>
+                    
+                    <table style="width: 100%; border-collapse: collapse;">
+                      <tr>
+                        <td style="padding: 8px 0; color: #666666;">Date:</td>
+                        <td style="padding: 8px 0; font-weight: bold; text-align: right;">
+                          ${new Date(date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #666666;">Time:</td>
+                        <td style="padding: 8px 0; font-weight: bold; text-align: right;">${timeSlot}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #666666;">Number of Guests:</td>
+                        <td style="padding: 8px 0; font-weight: bold; text-align: right;">${guests}</td>
+                      </tr>
+                      ${specialRequests ? `
+                      <tr>
+                        <td style="padding: 8px 0; color: #666666;">Special Requests:</td>
+                        <td style="padding: 8px 0; font-weight: bold; text-align: right;">${specialRequests}</td>
+                      </tr>
+                      ` : ''}
+                    </table>
+                  </div>
+                  
+                  <p style="margin-bottom: 25px; font-size: 16px;">We look forward to welcoming you to Noshe Cambridge and serving you our delicious Afghan cuisine.</p>
+                  
+                  <div style="background-color: #f8f4f4; padding: 15px; border-radius: 6px; margin-bottom: 25px;">
+                    <p style="margin: 0; color: #666666; font-size: 14px;">
+                      Need to modify or cancel your booking?<br>
+                      Please call us at <strong>07964 624055</strong>
+                    </p>
+                  </div>
+                  
+                  <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <p style="margin: 0; color: #666666; font-size: 14px;">
+                      Noshe Cambridge<br>
+                      07964 624055<br>
+                      noshecambridge@gmail.com
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </body>
+          </html>
         `,
         replyTo: 'noshecambridge@gmail.com'
       };
@@ -208,24 +260,76 @@ const handler: Handler = async (event) => {
         to: 'noshecambridge@gmail.com',
         subject: 'New Booking - Noshe Cambridge',
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #F5EBE0; color: #333;">
-            <h1 style="color: #8B2635; text-align: center;">New Booking Alert</h1>
-            <p>A new booking has been made at Noshe Cambridge:</p>
-            <div style="background-color: #fff; padding: 15px; border-radius: 5px; margin: 20px 0;">
-              <h2 style="color: #4A5D23; margin-top: 0;">Booking Details:</h2>
-              <p><strong>Name:</strong> ${name}</p>
-              <p><strong>Email:</strong> ${email}</p>
-              <p><strong>Phone:</strong> ${phone}</p>
-              <p><strong>Date:</strong> ${new Date(date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-              <p><strong>Time:</strong> ${timeSlot}</p>
-              <p><strong>Number of guests:</strong> ${guests}</p>
-              ${specialRequests ? `<p><strong>Special Requests:</strong> ${specialRequests}</p>` : ''}
-              <p><strong>Remaining Capacity:</strong> ${remainingCapacity - guests} seats</p>
-            </div>
-            <p>Please ensure the table is prepared accordingly.</p>
-          </div>
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>New Booking Alert</title>
+            </head>
+            <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; line-height: 1.6; background-color: #f5f5f5;">
+              <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                <div style="background-color: #8B2635; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+                  <h1 style="color: #ffffff; margin: 0; font-size: 28px;">New Booking Alert</h1>
+                </div>
+                
+                <div style="background-color: #ffffff; padding: 30px; border-radius: 0 0 8px 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                  <div style="background-color: #f8f4f4; padding: 20px; border-radius: 6px; margin-bottom: 25px;">
+                    <h2 style="color: #8B2635; margin-top: 0; margin-bottom: 15px; font-size: 20px;">Booking Details</h2>
+                    
+                    <table style="width: 100%; border-collapse: collapse;">
+                      <tr>
+                        <td style="padding: 8px 0; color: #666666;">Name:</td>
+                        <td style="padding: 8px 0; font-weight: bold; text-align: right;">${name}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #666666;">Email:</td>
+                        <td style="padding: 8px 0; font-weight: bold; text-align: right;">${email}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #666666;">Phone:</td>
+                        <td style="padding: 8px 0; font-weight: bold; text-align: right;">${phone}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #666666;">Date:</td>
+                        <td style="padding: 8px 0; font-weight: bold; text-align: right;">
+                          ${new Date(date).toLocaleDateString('en-GB', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #666666;">Time:</td>
+                        <td style="padding: 8px 0; font-weight: bold; text-align: right;">${timeSlot}</td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 8px 0; color: #666666;">Number of Guests:</td>
+                        <td style="padding: 8px 0; font-weight: bold; text-align: right;">${guests}</td>
+                      </tr>
+                      ${specialRequests ? `
+                      <tr>
+                        <td style="padding: 8px 0; color: #666666;">Special Requests:</td>
+                        <td style="padding: 8px 0; font-weight: bold; text-align: right;">${specialRequests}</td>
+                      </tr>
+                      ` : ''}
+                      <tr>
+                        <td style="padding: 8px 0; color: #666666;">Remaining Capacity:</td>
+                        <td style="padding: 8px 0; font-weight: bold; text-align: right; color: ${(remainingCapacity - guests) < 10 ? '#ff4444' : '#4CAF50'};">
+                          ${remainingCapacity - guests} seats
+                        </td>
+                      </tr>
+                    </table>
+                  </div>
+                  
+                  <div style="background-color: #f8f4f4; padding: 15px; border-radius: 6px;">
+                    <p style="margin: 0; color: #666666; text-align: center;">
+                      Please ensure the table is prepared accordingly
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </body>
+          </html>
         `,
-        replyTo: email // Set reply-to as customer's email
+        replyTo: email
       };
 
       console.log('Sending confirmation emails');

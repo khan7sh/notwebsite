@@ -21,14 +21,13 @@ interface EditBookingModalProps {
 }
 
 const TIME_SLOTS = [
-  { start: '09:00', end: '10:45' },
-  { start: '10:45', end: '12:30' },
-  { start: '12:30', end: '14:15' },
-  { start: '14:15', end: '16:00' },
-  { start: '16:00', end: '17:45' },
-  { start: '17:45', end: '19:30' },
-  { start: '19:30', end: '21:15' },
-  { start: '21:15', end: '23:00' },
+  '09:00-10:45', '09:30-11:15', '10:00-11:45', '10:30-12:15',
+  '11:00-12:45', '11:30-13:15', '12:00-13:45', '12:30-14:15',
+  '13:00-14:45', '13:30-15:15', '14:00-15:45', '14:30-16:15',
+  '15:00-16:45', '15:30-17:15', '16:00-17:45', '16:30-18:15',
+  '17:00-18:45', '17:30-19:15', '18:00-19:45', '18:30-20:15',
+  '19:00-20:45', '19:30-21:15', '20:00-21:45', '20:30-22:15',
+  '21:00-22:45'
 ];
 
 const EditBookingModal: React.FC<EditBookingModalProps> = ({ booking, onClose, onSave }) => {
@@ -73,16 +72,16 @@ const EditBookingModal: React.FC<EditBookingModalProps> = ({ booking, onClose, o
       const bookingTotalMinutes = bookingHour * 60 + bookingMinute;
 
       for (const slot of TIME_SLOTS) {
-        const slotHour = parseInt(slot.start.split(':')[0]);
-        const slotMinute = parseInt(slot.start.split(':')[1]);
+        const slotHour = parseInt(slot.split(':')[0]);
+        const slotMinute = parseInt(slot.split(':')[1]);
         const slotTotalMinutes = slotHour * 60 + slotMinute;
 
         if (Math.abs(bookingTotalMinutes - slotTotalMinutes) <= 45) {
-          return `${slot.start}-${slot.end}`;
+          return slot;
         }
       }
     }
-    return `${TIME_SLOTS[0].start}-${TIME_SLOTS[0].end}`;
+    return TIME_SLOTS[0];
   };
 
   return (
@@ -121,18 +120,15 @@ const EditBookingModal: React.FC<EditBookingModalProps> = ({ booking, onClose, o
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Time Slot</label>
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Time Slot</label>
             <select
-              name="timeSlot"
-              value={getCurrentTimeSlot()}
-              onChange={handleInputChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-burgundy focus:ring focus:ring-burgundy focus:ring-opacity-50"
+              value={editedBooking.timeSlot}
+              onChange={(e) => setEditedBooking({ ...editedBooking, timeSlot: e.target.value })}
+              className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-burgundy focus:border-burgundy"
             >
               {TIME_SLOTS.map((slot) => (
-                <option key={`${slot.start}-${slot.end}`} value={`${slot.start}-${slot.end}`}>
-                  {slot.start} - {slot.end}
-                </option>
+                <option key={slot} value={slot}>{slot}</option>
               ))}
             </select>
           </div>
